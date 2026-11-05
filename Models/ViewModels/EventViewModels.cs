@@ -263,6 +263,26 @@ public class ClassroomOption
     public int RoomNumber { get; set; }
 }
 
+public class TargetUserSearch
+{
+    public string? Role { get; set; }
+    public string? Q { get; set; }
+    public int? DepartmentId { get; set; }
+    public int? GradeLevelId { get; set; }
+    public int? ClassroomId { get; set; }
+    public int Page { get; set; } = 1;
+}
+
+public class TargetUserPage
+{
+    public List<UserOption> Items { get; set; } = [];
+    public int Total { get; set; }
+    public int Page { get; set; }
+    public bool HasMore { get; set; }
+    /// <summary>จำนวนสูงสุดที่กดเลือกทั้งหมดได้ในครั้งเดียว</summary>
+    public int SelectAllLimit { get; set; }
+}
+
 public class UserOption
 {
     public string Id { get; set; } = string.Empty;

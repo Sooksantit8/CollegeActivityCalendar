@@ -20,7 +20,8 @@ public interface IEventService
     Task<ServiceResult> CancelAsync(int id);
     Task<List<EventRow>> GetUpcomingAsync(int days, int take);
     Task<List<ClassroomOption>> GetTargetClassroomsAsync(int? yearId, int? levelId, int? gradeId, int? departmentId);
-    Task<List<UserOption>> SearchTargetUsersAsync(string? role, string? q);
+    Task<TargetUserPage> SearchTargetUsersAsync(TargetUserSearch search);
+    Task<List<UserOption>> SelectAllTargetUsersAsync(TargetUserSearch search);
     Task<int> PublishDueEventsAsync();
     Task<EventFormOptions> GetFormOptionsAsync();
     Task<EventFilterOptions> GetFilterOptionsAsync(EventFilter? current = null);
@@ -269,38 +270,72 @@ public class EventService(
             }).ToListAsync();
     }
 
-    public async Task<List<UserOption>> SearchTargetUsersAsync(string? role, string? q)
+    private const int TargetUserPageSize = 30;
+    private const int TargetUserSelectAllLimit = 2000;
+
+    public async Task<TargetUserPage> SearchTargetUsersAsync(TargetUserSearch search)
+    {
+        var scope = await scopes.GetAsync();
+        if (!scope.CanCreateEvents) return new TargetUserPage { Page = 1, SelectAllLimit = TargetUserSelectAllLimit };
+        var users = TargetUsers(scope, search);
+        var total = await users.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)TargetUserPageSize));
+        var page = Math.Clamp(search.Page, 1, totalPages);
+        return new TargetUserPage
+        {
+            Items = await ToUserOptionsAsync(users.Skip((page - 1) * TargetUserPageSize).Take(TargetUserPageSize)),
+            Total = total,
+            Page = page,
+            HasMore = page < totalPages,
+            SelectAllLimit = TargetUserSelectAllLimit
+        };
+    }
+
+    public async Task<List<UserOption>> SelectAllTargetUsersAsync(TargetUserSearch search)
     {
         var scope = await scopes.GetAsync();
         if (!scope.CanCreateEvents) return [];
-        var users = db.Users.AsNoTracking().Where(u => u.IsActive);
-        var teacherLimited = scope.IsTeacher && !scope.IsAdmin;
+        return await ToUserOptionsAsync(TargetUsers(scope, search).Take(TargetUserSelectAllLimit));
+    }
 
-        if (teacherLimited)
+    private IQueryable<ApplicationUser> TargetUsers(UserScope scope, TargetUserSearch f)
+    {
+        var users = db.Users.AsNoTracking().Where(u => u.IsActive);
+        if (scope.IsTeacher && !scope.IsAdmin)
         {
             users = users.Where(u => u.Id == scope.UserId || (u.StudentProfile != null
                 && (scope.DepartmentIds.Contains(u.StudentProfile.DepartmentId)
                     || (u.StudentProfile.ClassroomId != null && scope.ClassroomIds.Contains(u.StudentProfile.ClassroomId.Value)))));
         }
-        users = role switch
+        users = f.Role switch
         {
             AppRoles.Student => users.Where(u => u.StudentProfile != null),
             AppRoles.Teacher => users.Where(u => u.TeacherProfile != null),
             AppRoles.Staff => users.Where(u => u.StaffProfile != null),
             _ => users
         };
-        if (!string.IsNullOrWhiteSpace(q))
+        if (f.DepartmentId is not null) users = users.Where(u => u.StudentProfile != null && u.StudentProfile.DepartmentId == f.DepartmentId);
+        if (f.GradeLevelId is not null) users = users.Where(u => u.StudentProfile != null && u.StudentProfile.GradeLevelId == f.GradeLevelId);
+        if (f.ClassroomId is not null) users = users.Where(u => u.StudentProfile != null && u.StudentProfile.ClassroomId == f.ClassroomId);
+        if (!string.IsNullOrWhiteSpace(f.Q))
         {
-            var term = q.Trim();
+            var term = f.Q.Trim();
             users = users.Where(u => u.FullName.Contains(term) || u.Email!.Contains(term)
                 || (u.StudentProfile != null && u.StudentProfile.StudentCode.Contains(term)));
         }
-        var rows = await users.OrderBy(u => u.FullName).Take(30).Select(u => new
+        // เรียงให้คงที่ มิฉะนั้นคนที่ชื่อซ้ำอาจขาดหรือซ้ำระหว่างหน้า
+        return users.OrderBy(u => u.FullName).ThenBy(u => u.Id);
+    }
+
+    private static async Task<List<UserOption>> ToUserOptionsAsync(IQueryable<ApplicationUser> users)
+    {
+        var rows = await users.Select(u => new
         {
             u.Id, u.FullName,
             IsStudent = u.StudentProfile != null,
             IsTeacher = u.TeacherProfile != null,
             IsStaff = u.StaffProfile != null,
+            Code = u.StudentProfile != null ? u.StudentProfile.StudentCode : null,
             Room = u.StudentProfile != null && u.StudentProfile.Classroom != null ? u.StudentProfile.Classroom.Name : null
         }).ToListAsync();
 
@@ -311,7 +346,7 @@ public class EventService(
             RoleText = u.IsStudent ? DisplayText.Role(AppRoles.Student)
                 : u.IsTeacher ? DisplayText.Role(AppRoles.Teacher)
                 : u.IsStaff ? DisplayText.Role(AppRoles.Staff) : DisplayText.Role(AppRoles.Admin),
-            Detail = u.Room ?? ""
+            Detail = string.Join(" · ", new[] { u.Code, u.Room }.Where(x => !string.IsNullOrEmpty(x)))
         }).ToList();
     }
 

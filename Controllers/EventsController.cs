@@ -49,8 +49,12 @@ public class EventsController(IEventService events) : AppController
         Json(await events.GetTargetClassroomsAsync(yearId, levelId, gradeId, departmentId));
 
     [HttpGet, Authorize(Roles = AppRoles.EventManagers)]
-    public async Task<IActionResult> SearchUsers(string? role, string? q) =>
-        Json(await events.SearchTargetUsersAsync(role, q));
+    public async Task<IActionResult> SearchUsers([FromQuery] TargetUserSearch search) =>
+        Json(await events.SearchTargetUsersAsync(search));
+
+    [HttpGet, Authorize(Roles = AppRoles.EventManagers)]
+    public async Task<IActionResult> SelectAllUsers([FromQuery] TargetUserSearch search) =>
+        Json(await events.SelectAllTargetUsersAsync(search));
 
     [HttpPost, Authorize(Roles = AppRoles.EventManagers)]
     public async Task<IActionResult> Create([FromBody] EventInput input)

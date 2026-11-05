@@ -187,7 +187,7 @@
                                     <div class="col-5">
                                         <select id="tuRole" class="form-select form-select-sm" aria-label="ประเภทบุคคล">
                                             <option value="">ทุกประเภท</option>
-                                            <option value="Student">นักเรียน</option>
+                                            <option value="Student" selected>นักเรียน</option>
                                             <option value="Teacher">ครู</option>
                                             <option value="Staff">เจ้าหน้าที่</option>
                                         </select>
@@ -196,8 +196,38 @@
                                         <input id="tuSearch" type="search" class="form-control form-control-sm" placeholder="ค้นหาชื่อ อีเมล รหัส" aria-label="ค้นหาบุคคล">
                                     </div>
                                 </div>
-                                <div class="pick-list" id="tuList"></div>
-                                <div class="chip-list mt-2" id="tuChips"></div>
+                                <div class="row g-2 mb-2" id="tuStudentFilters">
+                                    <div class="col-12 col-sm-4">
+                                        <select id="tuDept" class="form-select form-select-sm" aria-label="กรองตามแผนก" asp-items="Model.RoomDepartments">
+                                            <option value="">ทุกแผนก</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-sm-4">
+                                        <select id="tuGrade" class="form-select form-select-sm" aria-label="กรองตามชั้นปี" asp-items="Model.GradeLevels">
+                                            <option value="">ทุกชั้นปี</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-sm-4">
+                                        <select id="tuRoom" class="form-select form-select-sm" aria-label="กรองตามห้องเรียน">
+                                            <option value="">ทุกห้อง</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pick-head">
+                                    <span id="tuSummary" aria-live="polite"></span>
+                                    <button type="button" class="btn-text" id="tuSelectAll"></button>
+                                </div>
+                                <div class="pick-list pick-list-lg" id="tuList"></div>
+                                <div class="pick-selected d-none" id="tuSelected">
+                                    <div class="pick-head mt-2">
+                                        <strong id="tuSelectedCount"></strong>
+                                        <span class="d-flex gap-3">
+                                            <button type="button" class="btn-text" id="tuExpand"></button>
+                                            <button type="button" class="btn-text" id="tuClear">ล้างทั้งหมด</button>
+                                        </span>
+                                    </div>
+                                    <div class="chip-list" id="tuChips"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

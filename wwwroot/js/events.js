@@ -4,6 +4,18 @@
 
     function changed() { $(document).trigger('event:changed'); }
 
+    const USER_CHIP_LIMIT = 12;
+    const USER_NAME_LIMIT = 20;
+
+    function number(n) { return n.toLocaleString('en-US'); }
+
+    /** รายชื่อบุคคลในรายละเอียดกิจกรรม ย่อไว้เมื่อมีคนจำนวนมาก */
+    function userNames(users) {
+        const names = users.slice(0, USER_NAME_LIMIT).map(function (x) { return x.name; }).join(', ');
+        const rest = users.length - USER_NAME_LIMIT;
+        return 'บุคคล ' + number(users.length) + ' คน: ' + names + (rest > 0 ? ' และอีก ' + number(rest) + ' คน' : '');
+    }
+
     function runAction(action, id, title) {
         const texts = {
             Publish: { t: 'เผยแพร่กิจกรรม', m: 'เผยแพร่ "' + title + '" ทันทีใช่หรือไม่', b: 'เผยแพร่' },
@@ -58,7 +70,7 @@
             if (t.college) parts.push('ทุกคนในวิทยาลัย');
             if (t.departments.length) parts.push('แผนก: ' + t.departments.map(function (x) { return x.name; }).join(', '));
             if (t.classrooms.length) parts.push('ห้องเรียน: ' + t.classrooms.map(function (x) { return x.name; }).join(', '));
-            if (e.canManage && t.users.length) parts.push('บุคคล: ' + t.users.map(function (x) { return x.name; }).join(', '));
+            if (e.canManage && t.users.length) parts.push(userNames(t.users));
             else if (t.userCount) parts.push(t.users.length ? 'บุคคล: คุณและผู้เกี่ยวข้อง ' + t.userCount + ' คน' : 'บุคคลที่เกี่ยวข้อง ' + t.userCount + ' คน');
             const $targets = $('#detailsTargets').empty();
             parts.forEach(function (p) { $('<div>').text(p).appendTo($targets); });
@@ -88,6 +100,9 @@
     const EventForm = {
         rooms: new Map(),
         users: new Map(),
+        usersExpanded: false,
+        userRequest: 0,
+        userRoomRequest: 0,
         keepCollege: false,
         el: function (name) { return $('#Input_' + name); },
 
@@ -97,10 +112,12 @@
             this.el('Id').val('');
             this.rooms = new Map();
             this.users = new Map();
+            this.usersExpanded = false;
             this.keepCollege = false;
             $('#eventFormError, #targetError').addClass('d-none').text('');
             $('#tuSearch').val('');
             $('#tuList').empty();
+            this.loadUserRooms();
             const validator = $(form).data('validator');
             if (validator) validator.resetForm();
             $(form).find('.input-validation-error').removeClass('input-validation-error');
@@ -208,31 +225,107 @@
             }).fail(function (xhr) { App.toast(App.errorMessage(xhr), 'error'); });
         },
 
-        searchUsers: function () {
-            App.getJson('Events/SearchUsers', { role: $('#tuRole').val() || null, q: $('#tuSearch').val() || null }).done(function (list) {
-                const $l = $('#tuList').empty();
-                if (!list.length) { $l.append('<p class="text-muted-soft small mb-0 p-2">ไม่พบบุคคล</p>'); return; }
-                list.forEach(function (u) {
-                    const $b = $('<button type="button" class="pick-item tu-add">').attr('data-id', u.id).attr('data-name', u.name);
-                    $('<i class="bi bi-plus-circle">').appendTo($b);
-                    $('<span>').text(u.name).appendTo($b);
-                    $('<small>').text(u.roleText + (u.detail ? ' · ' + u.detail : '')).appendTo($b);
-                    $l.append($b);
-                });
+        userQuery: function () {
+            const role = $('#tuRole').val() || null;
+            const student = role === 'Student';
+            return {
+                role: role,
+                q: $('#tuSearch').val() || null,
+                departmentId: student ? $('#tuDept').val() || null : null,
+                gradeLevelId: student ? $('#tuGrade').val() || null : null,
+                classroomId: student ? $('#tuRoom').val() || null : null
+            };
+        },
+
+        /** ห้องสำหรับกรองนักเรียน ใช้ปีการศึกษาปัจจุบันซึ่งเป็นค่าเริ่มต้นของตัวกรองห้องเรียน */
+        loadUserRooms: function () {
+            const year = $('#trYear option').filter(function () { return this.defaultSelected; }).val();
+            const id = ++this.userRoomRequest;
+            const self = this;
+            App.getJson('Events/GetClassrooms', {
+                yearId: year || null, departmentId: $('#tuDept').val() || null, gradeId: $('#tuGrade').val() || null
+            }).done(function (list) {
+                if (id !== self.userRoomRequest) return;
+                const $room = $('#tuRoom');
+                const current = $room.val();
+                $room.find('option:not(:first)').remove();
+                list.forEach(function (c) { $('<option>').val(c.id).text(c.name).appendTo($room); });
+                // ห้องเดิมไม่อยู่ในแผนกหรือชั้นปีใหม่ ต้องล้างตัวกรองแล้วค้นหาใหม่
+                const keep = current && list.some(function (c) { return String(c.id) === current; });
+                $room.val(keep ? current : '');
+                if (current && !keep) self.searchUsers();
             }).fail(function (xhr) { App.toast(App.errorMessage(xhr), 'error'); });
         },
 
+        searchUsers: function (page) {
+            const self = this;
+            const next = page || 1;
+            const id = ++this.userRequest;
+            const query = this.userQuery();
+            $('#tuStudentFilters').toggleClass('d-none', query.role !== 'Student');
+            App.getJson('Events/SearchUsers', $.extend({ page: next }, query)).done(function (r) {
+                // พิมพ์หรือเปลี่ยนตัวกรองระหว่างรอ ให้ใช้ผลของคำค้นล่าสุดเท่านั้น
+                if (id !== self.userRequest) return;
+                const $l = $('#tuList');
+                if (next === 1) $l.empty().scrollTop(0);
+                $('#tuMore').remove();
+                r.items.forEach(function (u) {
+                    const $row = $('<label class="pick-item">');
+                    $('<input class="form-check-input m-0 tu-user" type="checkbox">').val(u.id).attr('data-name', u.name).prop('checked', self.users.has(u.id)).appendTo($row);
+                    $('<span class="pick-name">').text(u.name).appendTo($row);
+                    $('<small>').text(u.detail || u.roleText).appendTo($row);
+                    $l.append($row);
+                });
+                if (!r.total) $l.append('<p class="text-muted-soft small mb-0 p-2">ไม่พบบุคคล</p>');
+                if (r.hasMore) {
+                    $('<button type="button" class="btn-text pick-more" id="tuMore">').attr('data-page', r.page + 1)
+                        .text('แสดงเพิ่ม (แสดง ' + number($l.find('.tu-user').length) + ' จาก ' + number(r.total) + ' คน)').appendTo($l);
+                }
+                const tooMany = r.total > r.selectAllLimit;
+                $('#tuSummary').text(tooMany
+                    ? 'พบ ' + number(r.total) + ' คน กรองให้ไม่เกิน ' + number(r.selectAllLimit) + ' คนเพื่อเลือกทั้งหมด'
+                    : 'พบ ' + number(r.total) + ' คน');
+                $('#tuSelectAll').toggleClass('d-none', !r.total || tooMany).text('เลือกทั้งหมด ' + number(r.total) + ' คน');
+            }).fail(function (xhr) {
+                if (id === self.userRequest) App.toast(App.errorMessage(xhr), 'error');
+            });
+        },
+
+        selectAllUsers: function () {
+            const self = this;
+            const $button = $('#tuSelectAll').prop('disabled', true);
+            App.getJson('Events/SelectAllUsers', this.userQuery()).done(function (list) {
+                list.forEach(function (u) { self.users.set(u.id, u.name); });
+                $('.tu-user').prop('checked', function () { return self.users.has(this.value); });
+                self.renderChips();
+                $('#targetError').addClass('d-none');
+            }).fail(function (xhr) { App.toast(App.errorMessage(xhr), 'error'); })
+                .always(function () { $button.prop('disabled', false); });
+        },
+
         renderChips: function () {
-            function draw($box, map, cls) {
+            function draw($box, entries, cls) {
                 $box.empty();
-                map.forEach(function (name, id) {
-                    const $chip = $('<span class="chip">').text(name);
-                    $('<button type="button" aria-label="นำออก">').addClass(cls).attr('data-id', id).html('<i class="bi bi-x"></i>').appendTo($chip);
+                entries.forEach(function (entry) {
+                    const $chip = $('<span class="chip">').text(entry[1]);
+                    $('<button type="button">').addClass(cls).attr('data-id', entry[0]).attr('aria-label', 'นำ ' + entry[1] + ' ออก').html('<i class="bi bi-x"></i>').appendTo($chip);
                     $box.append($chip);
                 });
             }
-            draw($('#trChips'), this.rooms, 'tr-remove');
-            draw($('#tuChips'), this.users, 'tu-remove');
+            draw($('#trChips'), Array.from(this.rooms), 'tr-remove');
+
+            // ย่อรายชื่อไว้ เลือกหลายร้อยคนแล้วฟอร์มจะได้ไม่ยาวเกินไป
+            const users = Array.from(this.users);
+            const collapsible = users.length > USER_CHIP_LIMIT;
+            if (!collapsible) this.usersExpanded = false;
+            $('#tuSelected').toggleClass('d-none', users.length === 0);
+            $('#tuSelectedCount').text('เลือกแล้ว ' + number(users.length) + ' คน');
+            $('#tuExpand').toggleClass('d-none', !collapsible).text(this.usersExpanded ? 'ย่อรายชื่อ' : 'ดูทั้งหมด');
+            $('#tuChips').toggleClass('chip-list-scroll', this.usersExpanded);
+            draw($('#tuChips'), this.usersExpanded ? users : users.slice(0, USER_CHIP_LIMIT), 'tu-remove');
+            if (collapsible && !this.usersExpanded) {
+                $('<span class="chip chip-more">').text('และอีก ' + number(users.length - USER_CHIP_LIMIT) + ' คน').appendTo('#tuChips');
+            }
         },
 
         collect: function () {
@@ -324,8 +417,19 @@
             if (!end.val() || end.val() < this.value) end.val(this.value);
         });
         $('#trYear, #trLevel, #trGrade, #trDept').on('change', function () { EventForm.loadRooms(); });
-        $('#tuRole').on('change', function () { EventForm.searchUsers(); });
-        $('#tuSearch').on('input', App.debounce(function () { EventForm.searchUsers(); }, 300));
+        $('#tuRole, #tuRoom').on('change', function () { EventForm.searchUsers(); });
+        $('#tuDept, #tuGrade').on('change', function () { EventForm.loadUserRooms(); EventForm.searchUsers(); });
+        $('#tuSearch').on('input', App.debounce(function () { EventForm.searchUsers(); }, 300))
+            // Enter ในช่องค้นหาต้องไม่บันทึกกิจกรรม
+            .on('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
+        $('#tuList').on('click', '#tuMore', function () { EventForm.searchUsers(Number($(this).attr('data-page'))); });
+        $('#tuSelectAll').on('click', function () { EventForm.selectAllUsers(); });
+        $('#tuExpand').on('click', function () { EventForm.usersExpanded = !EventForm.usersExpanded; EventForm.renderChips(); });
+        $('#tuClear').on('click', function () {
+            EventForm.users.clear();
+            $('.tu-user').prop('checked', false);
+            EventForm.renderChips();
+        });
 
         $(document).on('change', '.tr-room', function () {
             if (this.checked) EventForm.rooms.set(String(this.value), $(this).attr('data-name'));
@@ -343,13 +447,16 @@
             $('.tr-room').filter(function () { return String(this.value) === id; }).prop('checked', false);
             EventForm.renderChips();
         });
-        $(document).on('click', '.tu-add', function () {
-            EventForm.users.set($(this).attr('data-id'), $(this).attr('data-name'));
+        $(document).on('change', '.tu-user', function () {
+            if (this.checked) EventForm.users.set(this.value, $(this).attr('data-name'));
+            else EventForm.users.delete(this.value);
             EventForm.renderChips();
             $('#targetError').addClass('d-none');
         });
         $(document).on('click', '.tu-remove', function () {
-            EventForm.users.delete($(this).attr('data-id'));
+            const id = $(this).attr('data-id');
+            EventForm.users.delete(id);
+            $('.tu-user').filter(function () { return this.value === id; }).prop('checked', false);
             EventForm.renderChips();
         });
 
