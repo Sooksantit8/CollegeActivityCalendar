@@ -1,0 +1,122 @@
+@model PromotionIndexViewModel
+@{
+    ViewData["Title"] = "เลื่อนชั้นนักเรียน";
+    ViewData["Subtitle"] = "ทุกการดำเนินการจะเพิ่มประวัติใหม่ ไม่แก้ไขทับข้อมูลเดิม";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="History" class="btn btn-soft"><i class="bi bi-clock-history me-1"></i>ประวัติการเลื่อนชั้น</a>
+</div>
+<ol class="stepper" id="promotionSteps">
+    <li class="active" data-step="1"><span>1</span>เลือกปีและกติกา</li>
+    <li data-step="2"><span>2</span>กำหนดรายคน</li>
+    <li data-step="3"><span>3</span>สรุปก่อนยืนยัน</li>
+</ol>
+<section id="promotionStep1">
+    <div class="surface p-3 p-md-4 mb-3">
+        <h2 class="section-title">เลือกปีการศึกษาและนักเรียน</h2>
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <label class="form-label required" for="pFromYear">ปีต้นทาง</label>
+                <select id="pFromYear" class="form-select">
+                    @foreach (var y in Model.Years) { <option value="@y.Value" selected="@(y.Value == Model.DefaultFromYearId?.ToString())">@y.Text</option> }
+                </select>
+            </div>
+            <div class="col-6 col-lg-3">
+                <label class="form-label required" for="pToYear">ปีปลายทาง</label>
+                <select id="pToYear" class="form-select">
+                    @foreach (var y in Model.Years) { <option value="@y.Value" selected="@(y.Value == Model.DefaultToYearId?.ToString())">@y.Text</option> }
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label" for="pDept">แผนก</label>
+                <select id="pDept" class="form-select" asp-items="Model.Departments"><option value="">ทุกแผนก</option></select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label" for="pGrade">ชั้นปี</label>
+                <select id="pGrade" class="form-select" asp-items="Model.GradeLevels"><option value="">ทุกชั้นปี</option></select>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label class="form-label" for="pRoom">ห้องเรียน</label>
+                <select id="pRoom" class="form-select"><option value="">ทุกห้อง</option></select>
+            </div>
+        </div>
+    </div>
+    <div class="surface p-3 p-md-4 mb-3">
+        <h2 class="section-title">กติกาการเลื่อนชั้นรอบนี้</h2>
+        <p class="text-muted-soft small">ค่าเริ่มต้นมาจาก<a asp-controller="AcademicStructure" asp-action="Index" asp-route-tab="grades" class="link-accent">โครงสร้างการศึกษา</a> ปรับเฉพาะรอบนี้ได้โดยไม่กระทบค่าเริ่มต้น</p>
+        <div class="rule-grid">
+            @foreach (var r in Model.Rules)
+            {
+                <div class="rule-row">
+                    <label for="rule@(r.GradeLevelId)" class="fw-semibold text-nowrap">@r.GradeName <i class="bi bi-arrow-right mx-1"></i></label>
+                    <select id="rule@(r.GradeLevelId)" class="form-select form-select-sm promotion-rule" data-grade="@r.GradeLevelId">
+                        <option value="graduate" selected="@r.IsFinal">สำเร็จการศึกษา</option>
+                        <option value="retain" selected="@(!r.IsFinal && r.NextGradeLevelId is null)">ซ้ำชั้น</option>
+                        @foreach (var g in Model.GradeLevels)
+                        {
+                            <option value="@g.Value" selected="@(!r.IsFinal && g.Value == r.NextGradeLevelId?.ToString())">@g.Text</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-soft" id="pCloneRooms"><i class="bi bi-copy me-1"></i>สร้างห้องปีปลายทางจากปีต้นทาง</button>
+            <button type="button" class="btn btn-primary" id="pLoad">แสดงรายชื่อนักเรียน <i class="bi bi-arrow-right ms-1"></i></button>
+        </div>
+    </div>
+</section>
+
+<section id="promotionStep2" class="d-none">
+    <div class="surface p-3 p-md-4 mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="section-title mb-0">กำหนดการดำเนินการ <small id="pCount"></small></h2>
+            <button type="button" class="btn btn-soft btn-sm" id="pBack1"><i class="bi bi-arrow-left me-1"></i>กลับไปเลือกใหม่</button>
+        </div>
+        <div class="row g-2 align-items-end mb-3 bulk-bar">
+            <div class="col-sm-5 col-lg-3">
+                <label class="form-label" for="pBulkAction">เปลี่ยนการดำเนินการของที่เลือก</label>
+                <select id="pBulkAction" class="form-select form-select-sm"></select>
+            </div>
+            <div class="col-sm-auto"><button type="button" class="btn btn-soft btn-sm" id="pBulkApply">ใช้กับแถวที่เลือก</button></div>
+            <div class="col-sm-auto ms-sm-auto small text-muted-soft">แถวที่ไม่ได้เลือกจะไม่ถูกดำเนินการ</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 promotion-table">
+                <thead>
+                    <tr>
+                        <th><input class="form-check-input" type="checkbox" id="pCheckAll" checked aria-label="เลือกทั้งหมด"></th>
+                        <th>นักเรียน</th><th>ปัจจุบัน</th><th>การดำเนินการ</th><th>ห้องปลายทาง</th><th>หมายเหตุ</th>
+                    </tr>
+                </thead>
+                <tbody id="pRows"></tbody>
+            </table>
+        </div>
+        <div class="form-actions"><button type="button" class="btn btn-primary" id="pPreview">ดูสรุปก่อนยืนยัน <i class="bi bi-arrow-right ms-1"></i></button></div>
+    </div>
+</section>
+
+<section id="promotionStep3" class="d-none">
+    <div class="surface p-3 p-md-4 mb-3">
+        <h2 class="section-title" id="pPreviewTitle"></h2>
+        <div class="alert alert-danger d-none" id="pPreviewError"></div>
+        <div class="stat-grid stat-grid-sm" id="pSummary"></div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>นักเรียน</th><th>การดำเนินการ</th><th>จาก</th><th>ไปยัง</th><th>ผลตรวจสอบ</th></tr></thead>
+                <tbody id="pPreviewRows"></tbody>
+            </table>
+        </div>
+        <div class="mt-3">
+            <label class="form-label" for="pNote">หมายเหตุของรอบนี้</label>
+            <input id="pNote" class="form-control" maxlength="500">
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-soft" id="pBack2"><i class="bi bi-arrow-left me-1"></i>กลับไปแก้ไข</button>
+            <button type="button" class="btn btn-primary" id="pConfirm"><i class="bi bi-check2-circle me-1"></i>ยืนยันการเลื่อนชั้น</button>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script src="~/js/promotion.js" asp-append-version="true"></script>
+}

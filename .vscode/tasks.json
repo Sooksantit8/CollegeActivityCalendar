@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "process",
+      "command": "${env:HOME}/.dotnet10/dotnet",
+      "args": ["build", "${workspaceFolder}/CollegeActivityCalendar.sln", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
+      "options": {
+        "env": { "DOTNET_ROOT": "${env:HOME}/.dotnet10" }
+      },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

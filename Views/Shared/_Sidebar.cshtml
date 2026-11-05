@@ -1,0 +1,45 @@
+@using CollegeActivityCalendar.Services
+@inject ISettingsService Settings
+@{
+    var settings = await Settings.GetAsync();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isAdmin = User.IsInRole(AppRoles.Admin);
+    var isStudent = User.IsInRole(AppRoles.Student);
+    var items = new List<(string Controller, string Thai, string English, string Icon, string? Area, bool Show)>
+    {
+        ("Dashboard", "ภาพรวมระบบ", "Dashboard", "bi-grid-1x2", null, true),
+        ("Calendar", "ปฏิทินกิจกรรม", "Calendar", "bi-calendar3", null, true),
+        ("Events", isStudent ? "กิจกรรมของฉัน" : "จัดการกิจกรรม", isStudent ? "My Events" : "Manage Events", "bi-calendar-range", null, true),
+        ("Users", "ผู้ใช้งาน", "Users", "bi-people", null, isAdmin),
+        ("Departments", "แผนก/สาขา", "Departments", "bi-building", null, isAdmin),
+        ("AcademicStructure", "โครงสร้างการศึกษา", "Academic Structure", "bi-diagram-3", null, isAdmin),
+        ("MasterData", "ข้อมูลหลัก", "Master Data", "bi-database", "Admin", isAdmin),
+        ("StudentPromotion", "เลื่อนชั้นนักเรียน", "Student Promotion", "bi-mortarboard", null, isAdmin),
+        ("Reports", "รายงาน", "Reports", "bi-bar-chart", null, isAdmin),
+        ("Settings", "ตั้งค่าระบบ", "Settings", "bi-gear", null, isAdmin),
+        ("Profile", "ข้อมูลส่วนตัว", "Profile", "bi-person-circle", null, true)
+    };
+}
+<aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="เมนูหลัก">
+    <div class="sidebar-brand">
+        <span class="brand-mark"><i class="bi bi-calendar-week"></i></span>
+        <div class="min-w-0">
+            <div class="brand-name">College Calendar</div>
+            <div class="brand-caption text-truncate">@settings.CollegeName</div>
+        </div>
+        <button type="button" class="btn-close btn-close-white d-lg-none ms-auto" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="ปิดเมนู"></button>
+    </div>
+    <nav class="sidebar-nav">
+        @foreach (var item in items.Where(i => i.Show))
+        {
+            var active = string.Equals(controller, item.Controller, StringComparison.OrdinalIgnoreCase);
+            <a class="nav-item-link @(active ? "active" : "")" asp-area="@(item.Area ?? "")" asp-controller="@item.Controller" asp-action="Index" aria-current="@(active ? "page" : null)">
+                <i class="bi @item.Icon"></i>
+                <span>
+                    <span class="nav-label">@item.Thai</span>
+                    <span class="nav-sub">@item.English</span>
+                </span>
+            </a>
+        }
+    </nav>
+</aside>

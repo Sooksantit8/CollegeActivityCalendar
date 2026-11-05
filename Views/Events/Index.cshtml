@@ -1,0 +1,48 @@
+@model EventsIndexViewModel
+@{
+    var isStudent = User.IsInRole(AppRoles.Student);
+    ViewData["Title"] = isStudent ? "กิจกรรมของฉัน" : "จัดการกิจกรรม";
+    ViewData["Subtitle"] = isStudent ? "กิจกรรมที่เผยแพร่แล้วและเกี่ยวข้องกับคุณ" : "ค้นหา แก้ไข เผยแพร่ และยกเลิกกิจกรรม";
+    var presetLabel = Model.Filters.Current.Preset switch
+    {
+        "today" => "กิจกรรมวันนี้ (ไม่รวมที่ยกเลิก)",
+        "month" => "กิจกรรมเดือนนี้ (ไม่รวมที่ยกเลิก)",
+        "upcoming" => "กิจกรรมที่กำลังจะมาถึง (ไม่รวมที่ยกเลิก)",
+        "drafts" => "แบบร่างที่คุณจัดการได้",
+        "classroom" => "กิจกรรมของห้องเรียนของฉัน",
+        _ => null
+    };
+}
+<div class="surface p-3 p-md-4 mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="section-title mb-0">รายการกิจกรรม</h2>
+        @if (Model.Form is not null)
+        {
+            <button type="button" class="btn btn-primary" data-add-event><i class="bi bi-plus-lg me-1"></i>เพิ่มกิจกรรม</button>
+        }
+    </div>
+    @{ ViewData["ShowDates"] = true; }
+    <partial name="_EventFilters" model="Model.Filters" view-data="ViewData" />
+</div>
+@if (presetLabel is not null)
+{
+    <div class="preset-banner" id="filterPreset">
+        <span><i class="bi bi-funnel me-1"></i>กำลังดู: <strong>@presetLabel</strong></span>
+        <button type="button" class="btn btn-soft btn-sm" id="presetClear">ดูทั้งหมด</button>
+    </div>
+}
+<div id="eventList" aria-live="polite">
+    <partial name="_EventList" model="Model.List" />
+</div>
+@section Modals {
+    <partial name="_EventDetailsModal" />
+    @if (Model.Form is not null)
+    {
+        <partial name="_EventModal" model="Model.Form" />
+    }
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/events.js" asp-append-version="true"></script>
+    <script>EventList.init();</script>
+}

@@ -1,0 +1,63 @@
+@model UserImportPageViewModel
+@{
+    ViewData["Title"] = "นำเข้าจาก Excel";
+    ViewData["Subtitle"] = "เพิ่มครูหรือนักเรียนใหม่ทีละหลายคน";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Index" class="btn btn-soft"><i class="bi bi-arrow-left me-1"></i>กลับหน้าผู้ใช้งาน</a>
+</div>
+<section class="surface p-3 p-md-4 mb-3" id="importForm" data-role="@Model.Role">
+    <ul class="nav nav-pills tab-pills mb-3" id="importRole">
+        <li class="nav-item"><button type="button" class="nav-link @(Model.Role == AppRoles.Student ? "active" : "")" data-role="Student">นักเรียน</button></li>
+        <li class="nav-item"><button type="button" class="nav-link @(Model.Role == AppRoles.Teacher ? "active" : "")" data-role="Teacher">ครู</button></li>
+    </ul>
+    <ol class="import-steps">
+        <li>
+            <strong>ดาวน์โหลดแม่แบบ</strong>
+            <p class="small text-muted-soft mb-2" id="importHint"></p>
+            <a class="btn btn-soft btn-sm" id="importTemplate" href="#"><i class="bi bi-download me-1"></i>ดาวน์โหลดแม่แบบ</a>
+        </li>
+        <li>
+            <strong>กรอกข้อมูลในแผ่น "นำเข้า" แล้วอัปโหลดเพื่อตรวจสอบ</strong>
+            <p class="small text-muted-soft mb-2">ขั้นนี้ยังไม่บันทึกข้อมูล รองรับ .xlsx ไม่เกิน 5 MB และ 2,000 แถว</p>
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md">
+                    <input type="file" class="form-control" id="importFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-label="เลือกไฟล์ Excel">
+                </div>
+                <div class="col-12 col-md-auto">
+                    <button type="button" class="btn btn-primary w-100" id="importCheck" disabled><i class="bi bi-search me-1"></i>ตรวจสอบไฟล์</button>
+                </div>
+            </div>
+        </li>
+    </ol>
+    <div class="alert alert-danger d-none mt-3 mb-0" id="importError" role="alert"></div>
+</section>
+
+<section class="surface p-3 p-md-4 mb-3 d-none" id="importPreview" aria-live="polite">
+    <h2 class="section-title" id="previewTitle"></h2>
+    <div class="alert alert-danger d-none" id="previewBlocked"></div>
+    <div class="table-responsive import-table">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>แถว</th><th>ชื่อ-นามสกุล</th><th>อีเมล</th><th>รหัส</th><th>แผนก / ชั้นปี / ห้อง</th><th>รหัสผ่าน</th><th>ผลตรวจสอบ</th></tr></thead>
+            <tbody id="previewRows"></tbody>
+        </table>
+    </div>
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="importConfirm"><i class="bi bi-check2-circle me-1"></i>ยืนยันการนำเข้า</button>
+    </div>
+</section>
+
+<section class="surface p-3 p-md-4 d-none" id="importDone" aria-live="polite">
+    <h2 class="section-title"><i class="bi bi-check-circle text-success me-1"></i><span id="doneTitle"></span></h2>
+    <div class="alert alert-warning d-none" id="doneCredentials">
+        <p class="mb-2"><strong id="credentialsText"></strong> ไฟล์นี้ดาวน์โหลดได้ตอนนี้เท่านั้น เพราะระบบไม่เก็บรหัสผ่านที่อ่านได้</p>
+        <button type="button" class="btn btn-primary btn-sm" id="credentialsDownload"><i class="bi bi-download me-1"></i>ดาวน์โหลดไฟล์รหัสผ่าน</button>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-soft" id="doneList" href="#">ดูรายชื่อ</a>
+        <button type="button" class="btn btn-soft" id="doneAgain">นำเข้าไฟล์อื่น</button>
+    </div>
+</section>
+@section Scripts {
+    <script src="~/js/users-import.js" asp-append-version="true"></script>
+}

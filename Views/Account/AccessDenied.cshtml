@@ -1,0 +1,10 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "ไม่มีสิทธิ์เข้าถึง";
+}
+<div class="status-page">
+    <i class="bi bi-shield-lock"></i>
+    <h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1>
+    <p>บัญชีของคุณไม่มีสิทธิ์ใช้งานส่วนนี้ หากคิดว่าเป็นข้อผิดพลาด กรุณาติดต่อผู้ดูแลระบบ</p>
+    <a class="btn btn-primary" asp-controller="Dashboard" asp-action="Index">กลับหน้าหลัก</a>
+</div>

@@ -1,0 +1,11 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "เกิดข้อผิดพลาด";
+}
+<div class="status-page">
+    <i class="bi bi-exclamation-triangle"></i>
+    <h1>เกิดข้อผิดพลาดในระบบ</h1>
+    <p>กรุณาลองใหม่อีกครั้ง หากยังพบปัญหาให้แจ้งผู้ดูแลระบบพร้อมรหัสอ้างอิงนี้</p>
+    <code>@ViewData["RequestId"]</code>
+    <a class="btn btn-primary mt-3" asp-controller="Dashboard" asp-action="Index">กลับหน้าหลัก</a>
+</div>

@@ -1,0 +1,32 @@
+@model List<DepartmentRow>
+@{
+    ViewData["Title"] = "แผนก/สาขา";
+    ViewData["Subtitle"] = "ข้อมูลแผนกที่ใช้ทั้งห้องเรียน ครู นักเรียน และกลุ่มเป้าหมาย";
+}
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Form" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>เพิ่มแผนก</a>
+</div>
+<div class="dept-grid">
+    @foreach (var d in Model)
+    {
+        <div class="surface p-3 p-md-4">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="min-w-0">
+                    <h2 class="h6 fw-bold mb-1"><a asp-action="Details" asp-route-id="@d.Id" class="btn-link-title">@d.Name</a></h2>
+                    <div class="small text-muted-soft">รหัส @d.Code @(d.IsActive ? "" : "· ปิดใช้งาน")</div>
+                </div>
+                <div class="text-nowrap">
+                    <a asp-action="Form" asp-route-id="@d.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @d.Name"><i class="bi bi-pencil"></i></a>
+                    <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("Delete", new { id = d.Id })" data-confirm-message="ลบแผนก @d.Name ใช่หรือไม่" aria-label="ลบ @d.Name"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="dept-stats">
+                <span><strong>@d.StudentCount</strong> นักเรียน</span>
+                <span><strong>@d.TeacherCount</strong> ครู</span>
+                <span><strong>@d.ClassroomCount</strong> ห้อง</span>
+                <span><strong>@d.EventCount</strong> กิจกรรม</span>
+            </div>
+            <a asp-action="Details" asp-route-id="@d.Id" class="link-accent d-inline-block mt-2 small">ดูชั้นปีและห้องเรียน <i class="bi bi-arrow-right"></i></a>
+        </div>
+    }
+</div>

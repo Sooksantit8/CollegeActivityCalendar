@@ -1,0 +1,18 @@
+@{
+    Layout = "_AuthLayout";
+    var code = ViewData["Code"] as int? ?? 0;
+    var title = code switch
+    {
+        404 => "ไม่พบหน้าที่ต้องการ",
+        403 => "ไม่มีสิทธิ์เข้าถึง",
+        400 => "คำขอไม่ถูกต้อง หรือหน้าฟอร์มหมดอายุ กรุณาโหลดหน้าใหม่",
+        _ => "ไม่สามารถดำเนินการได้"
+    };
+    ViewData["Title"] = title;
+}
+<div class="status-page">
+    <i class="bi bi-compass"></i>
+    <h1>@title</h1>
+    <p>รหัสสถานะ @code</p>
+    <a class="btn btn-primary" asp-controller="Dashboard" asp-action="Index">กลับหน้าหลัก</a>
+</div>

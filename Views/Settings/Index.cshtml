@@ -1,0 +1,26 @@
+@model SettingsViewModel
+@{
+    ViewData["Title"] = "ตั้งค่าระบบ";
+    ViewData["Subtitle"] = "ข้อมูลวิทยาลัยและค่าเริ่มต้นของปฏิทิน";
+}
+<form asp-action="Index" method="post" class="surface form-card">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div class="row g-3">
+        <div class="col-12"><label asp-for="Input.CollegeName" class="form-label required"></label><input asp-for="Input.CollegeName" class="form-control"><span asp-validation-for="Input.CollegeName" class="invalid-text"></span></div>
+        <div class="col-md-6"><label asp-for="Input.ContactEmail" class="form-label"></label><input asp-for="Input.ContactEmail" class="form-control"><span asp-validation-for="Input.ContactEmail" class="invalid-text"></span></div>
+        <div class="col-md-6"><label asp-for="Input.ContactPhone" class="form-label"></label><input asp-for="Input.ContactPhone" class="form-control"><span asp-validation-for="Input.ContactPhone" class="invalid-text"></span></div>
+        <div class="col-md-4">
+            <label asp-for="Input.CurrentAcademicYearId" class="form-label required"></label>
+            <select asp-for="Input.CurrentAcademicYearId" asp-items="Model.Years" class="form-select"></select>
+            <span asp-validation-for="Input.CurrentAcademicYearId" class="invalid-text"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Input.DefaultCalendarView" class="form-label required"></label>
+            <select asp-for="Input.DefaultCalendarView" asp-items="Model.Views" class="form-select"></select>
+            <span asp-validation-for="Input.DefaultCalendarView" class="invalid-text"></span>
+        </div>
+        <div class="col-md-4"><label asp-for="Input.UpcomingDays" class="form-label"></label><input asp-for="Input.UpcomingDays" class="form-control"><span asp-validation-for="Input.UpcomingDays" class="invalid-text"></span></div>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,37 @@
+@model CalendarIndexViewModel
+@{
+    ViewData["Title"] = "ปฏิทินกิจกรรม";
+    ViewData["Subtitle"] = "แสดงเฉพาะกิจกรรมที่คุณมีสิทธิ์เห็น";
+}
+<div class="surface p-3 p-md-4 mb-3">
+    <partial name="_EventFilters" model="Model.Filters" />
+</div>
+<div class="surface p-2 p-md-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="legend" aria-label="คำอธิบายสี">
+            <span><span class="level-dot level-college"></span>วิทยาลัย</span>
+            <span><span class="level-dot level-department"></span>แผนก</span>
+            <span><span class="level-dot level-classroom"></span>ห้องเรียน</span>
+            <span><span class="level-dot level-individual"></span>บุคคล</span>
+        </div>
+        @if (Model.Form is not null)
+        {
+            <button type="button" class="btn btn-primary btn-sm" data-add-event><i class="bi bi-plus-lg me-1"></i>เพิ่มกิจกรรม</button>
+        }
+    </div>
+    <div id="calendar" data-default-view="@Model.DefaultView" data-can-create="@((Model.Form is not null).ToString().ToLowerInvariant())"></div>
+</div>
+@section Modals {
+    <partial name="_EventDetailsModal" />
+    @if (Model.Form is not null)
+    {
+        <partial name="_EventModal" model="Model.Form" />
+    }
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/fullcalendar/index.global.min.js"></script>
+    <script src="~/lib/fullcalendar/th.global.min.js"></script>
+    <script src="~/js/events.js" asp-append-version="true"></script>
+    <script src="~/js/calendar.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,51 @@
+@model EventFilterOptions
+@{
+    var showDates = ViewData["ShowDates"] as bool? ?? false;
+    var current = Model.Current;
+}
+<form id="eventFilterForm" class="row g-2 align-items-end" role="search" autocomplete="off">
+    <div class="col-12 col-xl-3">
+        <label class="form-label" for="fQ">ค้นหา</label>
+        <input id="fQ" name="q" type="search" class="form-control" placeholder="ชื่อ รายละเอียด หรือสถานที่" value="@current.Q">
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <label class="form-label" for="fDepartment">แผนก</label>
+        <select id="fDepartment" name="departmentId" class="form-select" asp-items="Model.Departments"><option value="">ทุกแผนก</option></select>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <label class="form-label" for="fGrade">ชั้นปี</label>
+        <select id="fGrade" name="gradeLevelId" class="form-select" asp-items="Model.GradeLevels"><option value="">ทุกชั้นปี</option></select>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <label class="form-label" for="fClassroom">ห้องเรียน</label>
+        <select id="fClassroom" name="classroomId" class="form-select" asp-items="Model.Classrooms"><option value="">ทุกห้อง</option></select>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <label class="form-label" for="fCategory">ประเภท</label>
+        <select id="fCategory" name="categoryId" class="form-select" asp-items="Model.Categories"><option value="">ทุกประเภท</option></select>
+    </div>
+    @if (Model.ShowStatus)
+    {
+        <div class="col-6 col-md-4 col-xl">
+            <label class="form-label" for="fStatus">สถานะ</label>
+            <select id="fStatus" name="status" class="form-select" asp-items="Model.Statuses"><option value="">ทุกสถานะ</option></select>
+        </div>
+    }
+    @if (showDates)
+    {
+        <div class="col-6 col-md-4 col-xl">
+            <label class="form-label" for="fFrom">ตั้งแต่วันที่</label>
+            <input id="fFrom" name="from" type="date" class="form-control" value="@current.From?.ToString("yyyy-MM-dd")">
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <label class="form-label" for="fTo">ถึงวันที่</label>
+            <input id="fTo" name="to" type="date" class="form-control" value="@current.To?.ToString("yyyy-MM-dd")">
+        </div>
+        <input type="hidden" name="startsAfter" value="@current.StartsAfter?.ToString("yyyy-MM-dd")">
+        <input type="hidden" name="activeOnly" value="@(current.ActiveOnly ? "true" : "")">
+        <input type="hidden" name="manageableOnly" value="@(current.ManageableOnly ? "true" : "")">
+    }
+    <div class="col-auto">
+        <button type="reset" class="btn btn-soft" id="filterReset"><i class="bi bi-arrow-counterclockwise me-1"></i>ล้าง</button>
+    </div>
+</form>

@@ -1,0 +1,67 @@
+@model MasterDataViewModel
+@{
+    ViewData["Title"] = "ข้อมูลหลัก";
+    ViewData["Subtitle"] = "สถานที่ ประเภทกิจกรรม และสถานะนักเรียน";
+    var tabs = new[] { ("locations", "สถานที่"), ("categories", "ประเภทกิจกรรม"), ("statuses", "สถานะนักเรียน") };
+    var (addAction, addLabel) = Model.Tab switch
+    {
+        "categories" => ("CategoryForm", "เพิ่มประเภทกิจกรรม"),
+        "statuses" => ("StatusForm", "เพิ่มสถานะนักเรียน"),
+        _ => ("LocationForm", "เพิ่มสถานที่")
+    };
+}
+<ul class="nav nav-pills tab-pills mb-3">
+    @foreach (var (key, label) in tabs)
+    {
+        <li class="nav-item"><a class="nav-link @(Model.Tab == key ? "active" : "")" asp-action="Index" asp-route-tab="@key">@label</a></li>
+    }
+</ul>
+<div class="d-flex justify-content-end mb-3"><a asp-action="@addAction" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>@addLabel</a></div>
+<div class="surface table-card table-responsive">
+    @if (Model.Tab == "categories")
+    {
+        <table class="table align-middle mb-0">
+            <thead><tr><th>ประเภทกิจกรรม</th><th>จำนวนกิจกรรม</th><th>สถานะ</th><th class="text-end">จัดการ</th></tr></thead>
+            <tbody>
+                @foreach (var r in Model.Categories)
+                {
+                    <tr><td class="fw-semibold"><span class="color-dot" style="background:@r.Color"></span>@r.Name</td><td>@r.EventCount</td><td>@(r.IsActive ? "เปิดใช้งาน" : "ปิดใช้งาน")</td>
+                        <td class="text-end text-nowrap"><a asp-action="CategoryForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                            <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteCategory", new { id = r.Id })" data-confirm-message="ลบประเภท @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                }
+            </tbody>
+        </table>
+    }
+    else if (Model.Tab == "statuses")
+    {
+        <table class="table align-middle mb-0">
+            <thead><tr><th>สถานะ</th><th>ยังศึกษาอยู่</th><th>จำนวนนักเรียน</th><th class="text-end">จัดการ</th></tr></thead>
+            <tbody>
+                @foreach (var r in Model.Statuses)
+                {
+                    <tr><td class="fw-semibold">@r.Name @if (r.IsSystem) { <span class="level-pill level-college ms-1">ระบบ</span> }</td><td>@(r.IsEnrolled ? "ใช่" : "ไม่ใช่")</td><td>@r.StudentCount</td>
+                        <td class="text-end text-nowrap"><a asp-action="StatusForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                            @if (!r.IsSystem)
+                            {
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteStatus", new { id = r.Id })" data-confirm-message="ลบสถานะ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button>
+                            }
+                        </td></tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <table class="table align-middle mb-0">
+            <thead><tr><th>สถานที่</th><th>อาคาร</th><th>ความจุ</th><th>สถานะ</th><th class="text-end">จัดการ</th></tr></thead>
+            <tbody>
+                @foreach (var r in Model.Locations)
+                {
+                    <tr><td class="fw-semibold">@r.Name</td><td>@r.Building</td><td>@(r.Capacity?.ToString("N0") ?? "-")</td><td>@(r.IsActive ? "เปิดใช้งาน" : "ปิดใช้งาน")</td>
+                        <td class="text-end text-nowrap"><a asp-action="LocationForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                            <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteLocation", new { id = r.Id })" data-confirm-message="ลบสถานที่ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

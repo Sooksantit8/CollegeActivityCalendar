@@ -1,0 +1,12 @@
+@model LocationInput
+@{ ViewData["Title"] = Model.Id is null ? "เพิ่มสถานที่" : "แก้ไขสถานที่"; }
+<form asp-action="LocationForm" method="post" class="surface form-card form-narrow">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Id">
+    <div class="mb-3"><label asp-for="Name" class="form-label required"></label><input asp-for="Name" class="form-control"><span asp-validation-for="Name" class="invalid-text"></span></div>
+    <div class="mb-3"><label asp-for="Building" class="form-label"></label><input asp-for="Building" class="form-control"><span asp-validation-for="Building" class="invalid-text"></span></div>
+    <div class="mb-3"><label asp-for="Capacity" class="form-label"></label><input asp-for="Capacity" class="form-control"><span asp-validation-for="Capacity" class="invalid-text"></span></div>
+    <div class="form-check mb-3"><input asp-for="IsActive" class="form-check-input"><label asp-for="IsActive" class="form-check-label"></label></div>
+    <div class="form-actions"><a asp-action="Index" asp-route-tab="locations" class="btn btn-soft">กลับ</a><button type="submit" class="btn btn-primary">บันทึก</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

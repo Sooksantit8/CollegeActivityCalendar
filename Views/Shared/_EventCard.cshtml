@@ -1,0 +1,19 @@
+@model EventRow
+<article class="surface event-card">
+    <div class="date-tile">
+        <strong>@Model.StartDate.Day</strong>
+        <span>@ThaiDate.MonthShort(Model.StartDate.Month)</span>
+    </div>
+    <div class="min-w-0 flex-grow-1">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <h3 class="event-title">@Model.Title</h3>
+            <partial name="_StatusBadge" model="Model.Status" />
+        </div>
+        <p class="event-meta"><i class="bi bi-clock me-1"></i>@Model.DateText</p>
+        <p class="event-meta"><i class="bi bi-geo-alt me-1"></i>@Model.LocationText</p>
+        <div class="d-flex flex-wrap gap-1 mt-2">
+            <partial name="_LevelBadges" model="Model.Levels" />
+        </div>
+    </div>
+    <button type="button" class="btn btn-soft btn-sm align-self-start text-nowrap" data-event-details="@Model.Id">รายละเอียด</button>
+</article>

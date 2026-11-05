@@ -1,0 +1,84 @@
+@model UserDetailsViewModel
+@{
+    ViewData["Title"] = Model.FullName;
+    ViewData["Subtitle"] = DisplayText.Role(Model.Role);
+}
+<div class="row g-3">
+    <div class="@(Model.Transfer is not null ? "col-lg-5" : "col-lg-8")">
+        <div class="surface p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title mb-0">ข้อมูลบัญชี</h2>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-soft btn-sm"><i class="bi bi-pencil me-1"></i>แก้ไข</a>
+            </div>
+            <partial name="_UserFacts" model="Model" />
+            <hr>
+            <form asp-action="ResetPassword" asp-route-id="@Model.Id" method="post" class="row g-2 align-items-end">
+                <div class="col">
+                    <label class="form-label" for="newPassword">ตั้งรหัสผ่านใหม่</label>
+                    <input class="form-control" id="newPassword" name="newPassword" type="password" autocomplete="new-password" required minlength="8">
+                </div>
+                <div class="col-auto"><button class="btn btn-soft" type="submit">บันทึกรหัส</button></div>
+            </form>
+        </div>
+    </div>
+    @if (Model.Transfer is not null)
+    {
+        <div class="col-lg-7">
+            <form asp-action="Transfer" method="post" class="surface p-3 p-md-4 h-100">
+                <h2 class="section-title">ย้ายห้อง ย้ายแผนก เปลี่ยนชั้นปี หรือเปลี่ยนสถานะ</h2>
+                <p class="text-muted-soft small">ทุกการเปลี่ยนแปลงจะเพิ่มประวัติใหม่ ไม่แก้ไขทับข้อมูลเดิม</p>
+                <input type="hidden" name="UserId" value="@Model.Id">
+                <div class="row g-3 room-cascade">
+                    <div class="col-md-4">
+                        <label class="form-label" for="tDept">แผนก</label>
+                        <select id="tDept" name="DepartmentId" class="form-select" data-cascade="dept" required>
+                            @foreach (var d in Model.Departments)
+                            {
+                                <option value="@d.Value" selected="@(d.Value == Model.Transfer.DepartmentId?.ToString())">@d.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="tGrade">ชั้นปี</label>
+                        <select id="tGrade" name="GradeLevelId" class="form-select" data-cascade="grade">
+                            <option value="">ไม่กำหนด</option>
+                            @foreach (var g in Model.Grades)
+                            {
+                                <option value="@g.Value" selected="@(g.Value == Model.Transfer.GradeLevelId?.ToString())">@g.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="tRoom">ห้องเรียน</label>
+                        <select id="tRoom" name="ClassroomId" class="form-select" data-cascade="room" data-selected="@Model.Transfer.ClassroomId">
+                            <option value="">ไม่กำหนดห้อง</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="tStatus">สถานะนักเรียน</label>
+                        <select id="tStatus" name="StudentStatusId" class="form-select" required>
+                            @foreach (var s in Model.Statuses)
+                            {
+                                <option value="@s.Value" selected="@(s.Value == Model.Transfer.StudentStatusId?.ToString())">@s.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="tNote">หมายเหตุ</label>
+                        <input id="tNote" name="Note" class="form-control" maxlength="500">
+                    </div>
+                </div>
+                <div class="form-actions"><button class="btn btn-primary" type="submit">บันทึกการเปลี่ยนแปลง</button></div>
+            </form>
+        </div>
+    }
+</div>
+@if (Model.Transfer is not null)
+{
+    <h2 class="section-title mt-4">ประวัติการศึกษา</h2>
+    <partial name="_AcademicHistory" model="Model.History" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/users.js" asp-append-version="true"></script>
+}

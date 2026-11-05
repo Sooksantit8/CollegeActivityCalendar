@@ -1,0 +1,18 @@
+@model AcademicYearInput
+@{ ViewData["Title"] = Model.Id is null ? "เพิ่มปีการศึกษา" : "แก้ไขปีการศึกษา"; }
+<form asp-action="YearForm" method="post" class="surface form-card form-narrow">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Id">
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label required"></label>
+        <input asp-for="Year" class="form-control">
+        <span asp-validation-for="Year" class="invalid-text"></span>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-6"><label asp-for="StartDate" class="form-label required"></label><input asp-for="StartDate" class="form-control"><span asp-validation-for="StartDate" class="invalid-text"></span></div>
+        <div class="col-6"><label asp-for="EndDate" class="form-label required"></label><input asp-for="EndDate" class="form-control"><span asp-validation-for="EndDate" class="invalid-text"></span></div>
+    </div>
+    <div class="form-check mb-3"><input asp-for="IsCurrent" class="form-check-input"><label asp-for="IsCurrent" class="form-check-label"></label></div>
+    <div class="form-actions"><a asp-action="Index" asp-route-tab="years" class="btn btn-soft">กลับ</a><button type="submit" class="btn btn-primary">บันทึก</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

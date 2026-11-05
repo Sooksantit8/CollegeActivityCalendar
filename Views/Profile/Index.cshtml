@@ -1,0 +1,69 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "ข้อมูลส่วนตัว";
+    ViewData["Subtitle"] = DisplayText.Role(Model.Details.Role);
+}
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="surface p-3 p-md-4 h-100">
+            <h2 class="section-title">@Model.Details.FullName</h2>
+            <partial name="_UserFacts" model="Model.Details" />
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <form asp-action="Update" method="post" class="surface p-3 p-md-4 mb-3">
+            <h2 class="section-title">แก้ไขข้อมูล</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    @if (User.IsInRole(AppRoles.Student))
+                    {
+                        <label asp-for="Edit.FullName" class="form-label"></label>
+                        <input asp-for="Edit.FullName" class="form-control" disabled aria-describedby="nameLockedHint">
+                        <div class="form-text" id="nameLockedHint"><i class="bi bi-lock me-1"></i>หากชื่อไม่ถูกต้อง กรุณาติดต่อผู้ดูแลระบบ</div>
+                    }
+                    else
+                    {
+                        <label asp-for="Edit.FullName" class="form-label required"></label>
+                        <input asp-for="Edit.FullName" class="form-control">
+                        <span asp-validation-for="Edit.FullName" class="invalid-text"></span>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Edit.PhoneNumber" class="form-label"></label>
+                    <input asp-for="Edit.PhoneNumber" class="form-control">
+                    <span asp-validation-for="Edit.PhoneNumber" class="invalid-text"></span>
+                </div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">บันทึก</button></div>
+        </form>
+        <form asp-action="ChangePassword" method="post" class="surface p-3 p-md-4">
+            <h2 class="section-title">เปลี่ยนรหัสผ่าน</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Password.CurrentPassword" class="form-label required"></label>
+                    <input asp-for="Password.CurrentPassword" class="form-control" autocomplete="current-password">
+                    <span asp-validation-for="Password.CurrentPassword" class="invalid-text"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Password.NewPassword" class="form-label required"></label>
+                    <input asp-for="Password.NewPassword" class="form-control" autocomplete="new-password">
+                    <span asp-validation-for="Password.NewPassword" class="invalid-text"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Password.ConfirmPassword" class="form-label required"></label>
+                    <input asp-for="Password.ConfirmPassword" class="form-control" autocomplete="new-password">
+                    <span asp-validation-for="Password.ConfirmPassword" class="invalid-text"></span>
+                </div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">เปลี่ยนรหัสผ่าน</button></div>
+        </form>
+    </div>
+</div>
+@if (Model.Details.StatusName is not null)
+{
+    <h2 class="section-title mt-4">ประวัติการศึกษาของฉัน</h2>
+    <partial name="_AcademicHistory" model="Model.Details.History" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

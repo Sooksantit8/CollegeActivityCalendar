@@ -1,0 +1,27 @@
+@model UserDetailsViewModel
+<dl class="detail-list">
+    <dt>อีเมล</dt><dd class="text-break">@Model.Email</dd>
+    <dt>เบอร์โทรศัพท์</dt><dd>@(Model.PhoneNumber ?? "-")</dd>
+    @if (Model.Code is not null) { <dt>รหัส</dt><dd>@Model.Code</dd> }
+    @if (Model.Position is not null) { <dt>ตำแหน่ง</dt><dd>@Model.Position</dd> }
+    @if (Model.DepartmentName is not null) { <dt>แผนก</dt><dd>@Model.DepartmentName</dd> }
+    @if (Model.ResponsibleStudentCount is not null)
+    {
+        <dt>ขอบเขตที่ดูแล</dt>
+        <dd>
+            @if (Model.TeacherAssignments.Count == 0) { <span>ยังไม่กำหนด</span> }
+            @foreach (var a in Model.TeacherAssignments) { <div>@a</div> }
+        </dd>
+        @if (Model.AdvisedClassrooms.Count > 0) { <dt>ครูที่ปรึกษาห้อง</dt><dd>@string.Join(", ", Model.AdvisedClassrooms)</dd> }
+        <dt>นักเรียนที่ดูแล</dt><dd>@Model.ResponsibleStudentCount.Value.ToString("N0") คน</dd>
+    }
+    @if (Model.StatusName is not null)
+    {
+        <dt>ชั้นปี</dt><dd>@(Model.GradeName ?? "-")</dd>
+        <dt>ห้องเรียน</dt><dd>@(Model.ClassroomName ?? "-")</dd>
+        <dt>สถานะ</dt><dd>@Model.StatusName</dd>
+        <dt>วันที่ขึ้นทะเบียน</dt><dd>@Model.EnrollDateText</dd>
+        <dt>ครูที่ดูแล</dt><dd>@(Model.ResponsibleTeachers.Count > 0 ? string.Join(", ", Model.ResponsibleTeachers) : "-")</dd>
+    }
+    <dt>บัญชี</dt><dd>@(Model.IsActive ? "เปิดใช้งาน" : "ปิดใช้งาน")</dd>
+</dl>

@@ -1,0 +1,109 @@
+@model AcademicStructureViewModel
+@{
+    ViewData["Title"] = "โครงสร้างการศึกษา";
+    ViewData["Subtitle"] = "ปีการศึกษา ภาคเรียน ระดับการศึกษา ชั้นปี และห้องเรียน";
+    var tabs = new[] { ("years", "ปีการศึกษา"), ("semesters", "ภาคเรียน"), ("levels", "ระดับการศึกษา"), ("grades", "ชั้นปี"), ("classrooms", "ห้องเรียน") };
+    var (addAction, addLabel) = Model.Tab switch
+    {
+        "semesters" => ("SemesterForm", "เพิ่มภาคเรียน"),
+        "levels" => ("LevelForm", "เพิ่มระดับการศึกษา"),
+        "grades" => ("GradeForm", "เพิ่มชั้นปี"),
+        "classrooms" => ("ClassroomForm", "เพิ่มห้องเรียน"),
+        _ => ("YearForm", "เพิ่มปีการศึกษา")
+    };
+}
+<ul class="nav nav-pills tab-pills mb-3">
+    @foreach (var (key, label) in tabs)
+    {
+        <li class="nav-item"><a class="nav-link @(Model.Tab == key ? "active" : "")" asp-action="Index" asp-route-tab="@key">@label</a></li>
+    }
+</ul>
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    @if (Model.Tab == "classrooms")
+    {
+        <form method="get" asp-action="Index" class="d-flex align-items-end gap-2">
+            <input type="hidden" name="tab" value="classrooms">
+            <div>
+                <label class="form-label" for="yearId">ปีการศึกษา</label>
+                <select id="yearId" name="yearId" class="form-select" onchange="this.form.submit()">
+                    @foreach (var y in Model.YearOptions)
+                    {
+                        <option value="@y.Value" selected="@(y.Value == Model.YearFilter?.ToString())">@y.Text</option>
+                    }
+                </select>
+            </div>
+        </form>
+    }
+    else { <span></span> }
+    <a asp-action="@addAction" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>@addLabel</a>
+</div>
+<div class="surface table-card table-responsive">
+    @switch (Model.Tab)
+    {
+        case "semesters":
+            <table class="table align-middle mb-0">
+                <thead><tr><th>ภาคเรียน</th><th>ปีการศึกษา</th><th>ช่วงเวลา</th><th class="text-end">จัดการ</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.Semesters)
+                    {
+                        <tr><td class="fw-semibold">@r.Name</td><td>@r.YearName</td><td>@r.RangeText</td>
+                            <td class="text-end text-nowrap"><a asp-action="SemesterForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteSemester", new { id = r.Id })" data-confirm-message="ลบ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                    }
+                </tbody>
+            </table>
+            break;
+        case "levels":
+            <table class="table align-middle mb-0">
+                <thead><tr><th>รหัส</th><th>ระดับการศึกษา</th><th>จำนวนชั้นปี</th><th class="text-end">จัดการ</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.Levels)
+                    {
+                        <tr><td>@r.Code</td><td class="fw-semibold">@r.Name</td><td>@r.GradeCount</td>
+                            <td class="text-end text-nowrap"><a asp-action="LevelForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteLevel", new { id = r.Id })" data-confirm-message="ลบ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                    }
+                </tbody>
+            </table>
+            break;
+        case "grades":
+            <table class="table align-middle mb-0">
+                <thead><tr><th>ชั้นปี</th><th>ระดับการศึกษา</th><th>เลื่อนชั้นไปเป็น</th><th class="text-end">จัดการ</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.Grades)
+                    {
+                        <tr><td class="fw-semibold">@r.Name</td><td>@r.LevelName</td><td>@r.NextText</td>
+                            <td class="text-end text-nowrap"><a asp-action="GradeForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteGrade", new { id = r.Id })" data-confirm-message="ลบ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                    }
+                </tbody>
+            </table>
+            break;
+        case "classrooms":
+            <table class="table align-middle mb-0">
+                <thead><tr><th>ห้องเรียน</th><th>ชั้นปี</th><th>แผนก</th><th>ครูที่ปรึกษา</th><th>นักเรียน</th><th class="text-end">จัดการ</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.Classrooms)
+                    {
+                        <tr><td class="fw-semibold text-nowrap">@r.Name</td><td>@r.GradeName</td><td>@r.DepartmentName</td><td>@r.AdvisorName</td><td>@r.StudentCount</td>
+                            <td class="text-end text-nowrap"><a asp-action="ClassroomForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteClassroom", new { id = r.Id })" data-confirm-message="ลบห้อง @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                    }
+                </tbody>
+            </table>
+            break;
+        default:
+            <table class="table align-middle mb-0">
+                <thead><tr><th>ปีการศึกษา</th><th>ช่วงเวลา</th><th>ห้องเรียน</th><th class="text-end">จัดการ</th></tr></thead>
+                <tbody>
+                    @foreach (var r in Model.Years)
+                    {
+                        <tr><td class="fw-semibold">@r.Name @if (r.IsCurrent) { <span class="status-pill status-published ms-1">ปีปัจจุบัน</span> }</td><td>@r.RangeText</td><td>@r.ClassroomCount</td>
+                            <td class="text-end text-nowrap"><a asp-action="YearForm" asp-route-id="@r.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @r.Name"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-confirm-post="@Url.Action("DeleteYear", new { id = r.Id })" data-confirm-message="ลบ @r.Name ใช่หรือไม่" aria-label="ลบ @r.Name"><i class="bi bi-trash"></i></button></td></tr>
+                    }
+                </tbody>
+            </table>
+            break;
+    }
+</div>

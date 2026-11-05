@@ -1,0 +1,44 @@
+@model UserListViewModel
+@if (Model.Items.Count == 0)
+{
+    <div class="surface empty-state"><i class="bi bi-search"></i><p>ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข</p></div>
+}
+else
+{
+    <div class="surface table-card">
+        <table class="table table-stack align-middle mb-0">
+            <thead><tr><th>ชื่อ-นามสกุล</th><th>รหัส</th><th>บทบาท</th><th>แผนก / ชั้นปี / ห้อง</th><th>สถานะ</th><th class="text-end">จัดการ</th></tr></thead>
+            <tbody>
+                @foreach (var u in Model.Items)
+                {
+                    <tr>
+                        <td data-label="ชื่อ-นามสกุล">
+                            <a asp-action="Details" asp-route-id="@u.Id" class="btn-link-title">@u.FullName</a>
+                            <div class="small text-muted-soft text-break">@u.Email</div>
+                        </td>
+                        <td data-label="รหัส">@u.Code</td>
+                        <td data-label="บทบาท">@DisplayText.Role(u.Role)</td>
+                        <td data-label="แผนก / ชั้นปี / ห้อง">@u.Detail</td>
+                        <td data-label="สถานะ">
+                            @if (u.IsActive) { <span class="status-pill status-published">เปิดใช้งาน</span> }
+                            else { <span class="status-pill status-cancelled">ปิดใช้งาน</span> }
+                        </td>
+                        <td class="text-end text-nowrap" data-label="จัดการ">
+                            <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-soft btn-sm" aria-label="แก้ไข @u.FullName"><i class="bi bi-pencil"></i></a>
+                            <button type="button" class="btn btn-soft btn-sm"
+                                    data-confirm-post="@Url.Action("SetActive", new { id = u.Id, active = !u.IsActive })"
+                                    data-confirm-title="@(u.IsActive ? "ปิดการใช้งาน" : "เปิดการใช้งาน")"
+                                    data-confirm-message="@(u.IsActive ? "ปิด" : "เปิด")การใช้งานบัญชี @u.FullName ใช่หรือไม่"
+                                    aria-label="@(u.IsActive ? "ปิด" : "เปิด")การใช้งาน @u.FullName"><i class="bi @(u.IsActive ? "bi-person-slash" : "bi-person-check")"></i></button>
+                            <button type="button" class="btn btn-soft-danger btn-sm"
+                                    data-confirm-post="@Url.Action("Delete", new { id = u.Id })"
+                                    data-confirm-message="ลบบัญชี @u.FullName ใช่หรือไม่ การลบนี้ย้อนกลับไม่ได้"
+                                    aria-label="ลบ @u.FullName"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+<partial name="_Pagination" model="(Model.Page, Model.TotalPages, Model.TotalCount)" />

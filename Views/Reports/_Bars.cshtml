@@ -1,0 +1,21 @@
+@model (string Title, string Unit, List<ReportBar> Rows)
+@{ var max = Model.Rows.Count == 0 ? 1 : Math.Max(1, Model.Rows.Max(r => r.Count)); }
+<section class="surface p-3 p-md-4 h-100">
+    <h2 class="section-title">@Model.Title</h2>
+    @if (Model.Rows.Count == 0)
+    {
+        <p class="text-muted-soft mb-0">ไม่มีข้อมูลในช่วงนี้</p>
+    }
+    else
+    {
+        <ul class="bar-list">
+            @foreach (var row in Model.Rows)
+            {
+                <li title="@row.Label: @row.Count.ToString("N0") @Model.Unit">
+                    <div class="bar-head"><span>@row.Label</span><strong>@row.Count.ToString("N0")</strong></div>
+                    <div class="bar-track"><div class="bar-fill" style="width:@((row.Count * 100.0 / max).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                </li>
+            }
+        </ul>
+    }
+</section>

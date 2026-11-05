@@ -1,0 +1,19 @@
+@model StatCardViewModel
+@using Microsoft.AspNetCore.Routing
+@if (Model.LinkController is not null)
+{
+    <a class="surface stat-card stat-link" asp-area="" asp-controller="@Model.LinkController" asp-action="Index" asp-all-route-data="Model.LinkValues"
+       data-stat-list="@Url.Action("List", Model.LinkController, new RouteValueDictionary(Model.LinkValues))" data-stat-title="@Model.Label" aria-expanded="false" aria-controls="statPanel">
+        <div class="stat-icon"><i class="bi @Model.Icon"></i></div>
+        <div class="stat-number">@Model.Value</div>
+        <p class="stat-label">@Model.Label <i class="bi bi-chevron-down stat-arrow"></i></p>
+    </a>
+}
+else
+{
+    <div class="surface stat-card">
+        <div class="stat-icon"><i class="bi @Model.Icon"></i></div>
+        <div class="stat-number">@Model.Value</div>
+        <p class="stat-label">@Model.Label</p>
+    </div>
+}

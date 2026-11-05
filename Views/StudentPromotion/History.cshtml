@@ -1,0 +1,32 @@
+@model List<PromotionHistoryRow>
+@{
+    ViewData["Title"] = "ประวัติการเลื่อนชั้น";
+    ViewData["Subtitle"] = "ผู้ดำเนินการ วันที่ และรายละเอียดของแต่ละรอบ";
+}
+<div class="d-flex justify-content-end mb-3"><a asp-action="Index" class="btn btn-soft"><i class="bi bi-arrow-left me-1"></i>กลับหน้าเลื่อนชั้น</a></div>
+@if (Model.Count == 0)
+{
+    <div class="surface empty-state"><i class="bi bi-clock-history"></i><p>ยังไม่มีประวัติการเลื่อนชั้น</p></div>
+}
+else
+{
+    <div class="surface table-card">
+        <table class="table table-stack align-middle mb-0">
+            <thead><tr><th>วันที่ดำเนินการ</th><th>จากปี</th><th>ไปปี</th><th>จำนวน</th><th>ผู้ดำเนินการ</th><th>หมายเหตุ</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td data-label="วันที่">@h.ExecutedAtText</td>
+                        <td data-label="จากปี">@h.FromYear</td>
+                        <td data-label="ไปปี">@h.ToYear</td>
+                        <td data-label="จำนวน">@h.Total คน</td>
+                        <td data-label="ผู้ดำเนินการ">@h.ExecutedBy</td>
+                        <td data-label="หมายเหตุ">@(h.Note ?? "-")</td>
+                        <td class="text-end"><a asp-action="HistoryDetails" asp-route-id="@h.Id" class="btn btn-soft btn-sm">ดูรายละเอียด</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

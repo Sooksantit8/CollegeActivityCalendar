@@ -1,0 +1,14 @@
+# SQL Server สำหรับพัฒนาบนเครื่อง ใช้รหัสผ่านจากไฟล์ .env (ดู README)
+services:
+  sqlserver:
+    image: ${MSSQL_IMAGE:-mcr.microsoft.com/mssql/server:2022-latest}
+    container_name: college-calendar-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?กรุณากำหนด MSSQL_SA_PASSWORD ในไฟล์ .env}
+    ports:
+      - "${MSSQL_PORT:-1433}:1433"
+    volumes:
+      - college-calendar-sql:/var/opt/mssql
+volumes:
+  college-calendar-sql:

@@ -1,0 +1,28 @@
+@model PromotionHistoryDetailsViewModel
+@{
+    ViewData["Title"] = $"รอบเลื่อนชั้น {Model.Header.FromYear} → {Model.Header.ToYear}";
+    ViewData["Subtitle"] = $"ดำเนินการโดย {Model.Header.ExecutedBy} · {Model.Header.ExecutedAtText}";
+}
+<div class="d-flex justify-content-end mb-3"><a asp-action="History" class="btn btn-soft"><i class="bi bi-arrow-left me-1"></i>กลับประวัติ</a></div>
+@if (!string.IsNullOrEmpty(Model.Header.Note))
+{
+    <div class="alert alert-light border">หมายเหตุ: @Model.Header.Note</div>
+}
+<div class="surface table-card">
+    <table class="table table-stack align-middle mb-0">
+        <thead><tr><th>รหัส</th><th>นักเรียน</th><th>การดำเนินการ</th><th>จาก</th><th>ไปยัง</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>
+            @foreach (var r in Model.Rows)
+            {
+                <tr>
+                    <td data-label="รหัส">@r.StudentCode</td>
+                    <td data-label="นักเรียน" class="fw-semibold">@r.FullName</td>
+                    <td data-label="การดำเนินการ">@r.ActionText</td>
+                    <td data-label="จาก">@r.FromText</td>
+                    <td data-label="ไปยัง">@r.ToText</td>
+                    <td data-label="หมายเหตุ">@(r.Note ?? "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

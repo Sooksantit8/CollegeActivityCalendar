@@ -1,0 +1,109 @@
+@model DepartmentDetailsViewModel
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["Subtitle"] = $"รหัส {Model.Code} · ชั้นปี ห้องเรียน นักเรียน และครูผู้ดูแล";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <form method="get" asp-action="Details" asp-route-id="@Model.Id">
+        <label class="form-label" for="yearId">ปีการศึกษา</label>
+        <select id="yearId" name="yearId" class="form-select" onchange="this.form.submit()">
+            @foreach (var y in Model.Years)
+            {
+                <option value="@y.Value" selected="@(y.Value == Model.YearId?.ToString())">@y.Text</option>
+            }
+        </select>
+    </form>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Index" class="btn btn-soft"><i class="bi bi-arrow-left me-1"></i>กลับรายการแผนก</a>
+        <a asp-controller="AcademicStructure" asp-action="ClassroomForm" class="btn btn-soft"><i class="bi bi-plus-lg me-1"></i>เพิ่มห้องเรียน</a>
+    </div>
+</div>
+
+<div class="stat-grid">
+    @foreach (var stat in Model.Stats)
+    {
+        <partial name="_StatCard" model="stat" />
+    }
+</div>
+
+<section class="surface p-3 p-md-4 mb-3">
+    <h2 class="section-title">ครูผู้ดูแลแผนกนี้</h2>
+    @if (Model.Teachers.Count == 0)
+    {
+        <p class="text-muted-soft mb-0">ยังไม่มีครูผู้ดูแล กำหนดได้ที่หน้าผู้ใช้งาน → แท็บครู → แก้ไข</p>
+    }
+    else
+    {
+        <ul class="teacher-list">
+            @foreach (var t in Model.Teachers)
+            {
+                <li>
+                    <a asp-controller="Users" asp-action="Details" asp-route-id="@t.UserId" class="btn-link-title">@t.Name</a>
+                    <span class="small text-muted-soft">@t.Scope</span>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<h2 class="section-title">ชั้นปีและห้องเรียน</h2>
+@if (Model.Grades.Count == 0)
+{
+    <div class="surface empty-state mb-3"><i class="bi bi-door-closed"></i><p>แผนกนี้ยังไม่มีห้องเรียนในปีการศึกษานี้</p></div>
+}
+else
+{
+    <div class="accordion mb-3" id="gradeAccordion">
+        @for (var g = 0; g < Model.Grades.Count; g++)
+        {
+            var grade = Model.Grades[g];
+            <div class="accordion-item">
+                <h3 class="accordion-header">
+                    <button class="accordion-button @(g == 0 ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#grade@(g)" aria-expanded="@(g == 0 ? "true" : "false")" aria-controls="grade@(g)">
+                        <span class="fw-bold me-2">@grade.Name</span>
+                        <span class="small text-muted-soft">@grade.Rooms.Count ห้อง · นักเรียน @grade.StudentCount คน</span>
+                    </button>
+                </h3>
+                <div id="grade@(g)" class="accordion-collapse collapse @(g == 0 ? "show" : "")" data-bs-parent="#gradeAccordion">
+                    <div class="accordion-body">
+                        <div class="room-grid">
+                            @foreach (var room in grade.Rooms)
+                            {
+                                <article class="room-card">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <h4 class="room-title">@room.Name</h4>
+                                        <button class="btn btn-soft btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#room@(room.Id)" aria-expanded="false" aria-controls="room@(room.Id)" disabled="@(room.Students.Count == 0)">
+                                            <i class="bi bi-people me-1"></i>นักเรียน @room.Students.Count คน
+                                        </button>
+                                    </div>
+                                    <div class="room-teachers">
+                                        <span class="small text-muted-soft">ครูผู้ดูแล:</span>
+                                        @if (room.Teachers.Count == 0)
+                                        {
+                                            <span class="small">ยังไม่มี</span>
+                                        }
+                                        @foreach (var t in room.Teachers)
+                                        {
+                                            <a asp-controller="Users" asp-action="Details" asp-route-id="@t.UserId" class="teacher-tag">@t.Name <small>@t.Scope</small></a>
+                                        }
+                                    </div>
+                                    <div class="collapse" id="room@(room.Id)">
+                                        <partial name="_DepartmentStudents" model="room.Students" />
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.UnassignedStudents.Count > 0)
+{
+    <section class="surface p-3 p-md-4">
+        <h2 class="section-title">นักเรียนที่ยังไม่มีห้อง <small>@Model.UnassignedStudents.Count คน</small></h2>
+        <partial name="_DepartmentStudents" model="Model.UnassignedStudents" />
+    </section>
+}

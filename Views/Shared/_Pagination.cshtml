@@ -1,0 +1,18 @@
+@model (int Page, int TotalPages, int TotalCount)
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+    <small class="text-muted-soft">ทั้งหมด @Model.TotalCount.ToString("N0") รายการ</small>
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="เปลี่ยนหน้า">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                    <button type="button" class="page-link" data-page="@(Model.Page - 1)" aria-label="หน้าก่อน"><i class="bi bi-chevron-left"></i></button>
+                </li>
+                <li class="page-item disabled"><span class="page-link">หน้า @Model.Page / @Model.TotalPages</span></li>
+                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                    <button type="button" class="page-link" data-page="@(Model.Page + 1)" aria-label="หน้าถัดไป"><i class="bi bi-chevron-right"></i></button>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

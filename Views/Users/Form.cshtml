@@ -1,0 +1,141 @@
+@model UserFormViewModel
+@{
+    ViewData["Title"] = Model.IsEdit ? "แก้ไขผู้ใช้งาน" : "เพิ่มผู้ใช้งาน";
+}
+<form asp-action="@(Model.IsEdit ? "Edit" : "Create")" asp-route-id="@Model.Input.Id" method="post" id="userForm" class="surface form-card">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Input.Id">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="Input.FullName" class="form-label required"></label>
+            <input asp-for="Input.FullName" class="form-control">
+            <span asp-validation-for="Input.FullName" class="invalid-text"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Input.Email" class="form-label required"></label>
+            <input asp-for="Input.Email" class="form-control">
+            <span asp-validation-for="Input.Email" class="invalid-text"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Input.PhoneNumber" class="form-label"></label>
+            <input asp-for="Input.PhoneNumber" class="form-control">
+            <span asp-validation-for="Input.PhoneNumber" class="invalid-text"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Input.Role" class="form-label required"></label>
+            @if (Model.IsEdit)
+            {
+                <input type="hidden" asp-for="Input.Role" id="roleValue">
+                <input class="form-control" value="@DisplayText.Role(Model.Input.Role)" disabled>
+            }
+            else
+            {
+                <select asp-for="Input.Role" asp-items="Model.Roles" class="form-select" id="roleValue"></select>
+            }
+            <span asp-validation-for="Input.Role" class="invalid-text"></span>
+        </div>
+        @if (!Model.IsEdit)
+        {
+            <div class="col-md-6">
+                <label asp-for="Input.Password" class="form-label required"></label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password">
+                <div class="form-text">อย่างน้อย 8 ตัวอักษร มีตัวพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</div>
+                <span asp-validation-for="Input.Password" class="invalid-text"></span>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input asp-for="Input.IsActive" class="form-check-input">
+                    <label asp-for="Input.IsActive" class="form-check-label"></label>
+                </div>
+            </div>
+        }
+        <div class="col-md-6 role-section" data-roles="Student,Teacher,Staff">
+            <label asp-for="Input.Code" class="form-label required"></label>
+            <input asp-for="Input.Code" class="form-control">
+            <span asp-validation-for="Input.Code" class="invalid-text"></span>
+        </div>
+
+        <div class="col-md-6 role-section" data-roles="Staff">
+            <label asp-for="Input.Position" class="form-label"></label>
+            <input asp-for="Input.Position" class="form-control">
+            <span asp-validation-for="Input.Position" class="invalid-text"></span>
+        </div>
+        @if (!Model.IsEdit)
+        {
+            <div class="col-12 role-section" data-roles="Student">
+                <div class="row g-3 room-cascade">
+                    <div class="col-md-3">
+                        <label asp-for="Input.DepartmentId" class="form-label required"></label>
+                        <select asp-for="Input.DepartmentId" asp-items="Model.Departments" class="form-select" data-cascade="dept"><option value="">เลือกแผนก</option></select>
+                        <span asp-validation-for="Input.DepartmentId" class="invalid-text"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Input.GradeLevelId" class="form-label"></label>
+                        <select asp-for="Input.GradeLevelId" asp-items="Model.Grades" class="form-select" data-cascade="grade"><option value="">ยังไม่กำหนด</option></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Input.ClassroomId" class="form-label"></label>
+                        <select asp-for="Input.ClassroomId" class="form-select" data-cascade="room" data-selected="@Model.Input.ClassroomId"><option value="">ยังไม่กำหนดห้อง</option></select>
+                        <span asp-validation-for="Input.ClassroomId" class="invalid-text"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Input.StudentStatusId" class="form-label required"></label>
+                        <select asp-for="Input.StudentStatusId" asp-items="Model.Statuses" class="form-select"><option value="">เลือกสถานะ</option></select>
+                        <span asp-validation-for="Input.StudentStatusId" class="invalid-text"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 role-section" data-roles="Staff">
+                <label class="form-label" for="staffDept">แผนก</label>
+                <select id="staffDept" class="form-select staff-dept" asp-items="Model.Departments"><option value="">ไม่สังกัดแผนก</option></select>
+            </div>
+        }
+        else if (Model.Input.Role == AppRoles.Staff)
+        {
+            <div class="col-md-6">
+                <label asp-for="Input.DepartmentId" class="form-label"></label>
+                <select asp-for="Input.DepartmentId" asp-items="Model.Departments" class="form-select"><option value="">ไม่สังกัดแผนก</option></select>
+            </div>
+        }
+        else if (Model.Input.Role == AppRoles.Student)
+        {
+            <div class="col-12"><p class="text-muted-soft small mb-0"><i class="bi bi-info-circle me-1"></i>การย้ายห้อง ย้ายแผนก เปลี่ยนชั้นปี และเปลี่ยนสถานะ ทำที่หน้ารายละเอียดเพื่อให้ระบบบันทึกประวัติ</p></div>
+        }
+        <div class="col-12 role-section" data-roles="Teacher">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                <label class="form-label required mb-0">ขอบเขตที่ดูแล</label>
+                <button type="button" class="btn btn-soft btn-sm" id="addAssignment"><i class="bi bi-plus-lg me-1"></i>เพิ่มแถว</button>
+            </div>
+            <p class="text-muted-soft small mb-2">เลือกแค่แผนก = ดูแลทั้งแผนก, เลือกชั้นปีด้วย = ทุกห้องของชั้นปีนั้น, เลือกห้องด้วย = เฉพาะห้องนั้น</p>
+            <div id="assignmentRows" data-assignments="@System.Text.Json.JsonSerializer.Serialize(Model.Input.Assignments)"></div>
+            <span asp-validation-for="Input.Assignments" class="invalid-text"></span>
+            <template id="assignmentRowTemplate">
+                <div class="row g-2 align-items-end assignment-row room-cascade mb-2">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">แผนก</label>
+                        <select class="form-select" data-field="DepartmentId" data-cascade="dept" asp-items="Model.Departments"><option value="">เลือกแผนก</option></select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label">ชั้นปี</label>
+                        <select class="form-select" data-field="GradeLevelId" data-cascade="grade" asp-items="Model.Grades"><option value="">ทุกชั้นปี</option></select>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label">ห้องเรียน</label>
+                        <select class="form-select" data-field="ClassroomId" data-cascade="room"><option value="">ทุกห้อง</option></select>
+                    </div>
+                    <div class="col-12 col-md-1 text-end">
+                        <button type="button" class="btn btn-soft-danger remove-assignment" aria-label="ลบแถวนี้"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    <div class="form-actions">
+        <a asp-action="Index" class="btn btn-soft">กลับ</a>
+        <button type="submit" class="btn btn-primary">บันทึก</button>
+    </div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/users.js" asp-append-version="true"></script>
+}

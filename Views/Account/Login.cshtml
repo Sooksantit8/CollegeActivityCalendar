@@ -1,0 +1,58 @@
+@model LoginViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "เข้าสู่ระบบ";
+}
+<div class="auth-shell">
+    <section class="auth-hero">
+        <span class="brand-mark"><i class="bi bi-calendar-week"></i></span>
+        <h1>ทุกกิจกรรมของวิทยาลัย<br>ในปฏิทินเดียว</h1>
+        <p>ติดตามกิจกรรมระดับวิทยาลัย แผนก ห้องเรียน และรายบุคคล เห็นเฉพาะสิ่งที่เกี่ยวข้องกับคุณ</p>
+    </section>
+    <section class="auth-panel">
+        <form asp-action="Login" method="post" class="auth-form">
+            <h2>เข้าสู่ระบบ</h2>
+            <p class="text-muted-soft">College Activity Calendar</p>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            <input type="hidden" asp-for="ReturnUrl">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="username" autofocus>
+                <span asp-validation-for="Email" class="invalid-text"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password">
+                <span asp-validation-for="Password" class="invalid-text"></span>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input">
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+
+            @if (Model.ShowDemoAccounts)
+            {
+                <div class="demo-accounts">
+                    <strong>บัญชีตัวอย่าง (เฉพาะโหมดข้อมูลตัวอย่าง)</strong>
+                    <p>รหัสผ่านทุกบัญชี: <code>College@@2569</code></p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-soft btn-sm" data-demo="admin@college.example">Admin</button>
+                        <button type="button" class="btn btn-soft btn-sm" data-demo="staff@college.example">Staff</button>
+                        <button type="button" class="btn btn-soft btn-sm" data-demo="teacher@college.example">Teacher</button>
+                        <button type="button" class="btn btn-soft btn-sm" data-demo="student@college.example">Student</button>
+                    </div>
+                </div>
+            }
+        </form>
+    </section>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $('[data-demo]').on('click', function () {
+            $('#Email').val($(this).data('demo'));
+            $('#Password').val('College@@2569');
+        });
+    </script>
+}

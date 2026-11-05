@@ -1,0 +1,57 @@
+@model UsersIndexViewModel
+@{
+    ViewData["Title"] = "ผู้ใช้งาน";
+    ViewData["Subtitle"] = "จัดการครู นักเรียน เจ้าหน้าที่ และผู้ดูแลระบบ";
+    var tabs = new[] { ("", "ทั้งหมด"), (AppRoles.Teacher, "ครู"), (AppRoles.Student, "นักเรียน"), (AppRoles.Staff, "เจ้าหน้าที่"), (AppRoles.Admin, "ผู้ดูแลระบบ") };
+    var active = Model.ActiveRole ?? "";
+}
+<ul class="nav nav-pills tab-pills mb-3" id="userRoleTabs">
+    @foreach (var (key, label) in tabs)
+    {
+        <li class="nav-item">
+            <a class="nav-link @(active == key ? "active" : "")" asp-action="Index" asp-route-role="@(key == "" ? null : key)" data-role="@key">@label</a>
+        </li>
+    }
+</ul>
+<div class="surface p-3 p-md-4 mb-3">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="section-title mb-0">รายชื่อผู้ใช้งาน</h2>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+            <a asp-action="Import" asp-route-role="@(active == AppRoles.Teacher ? AppRoles.Teacher : AppRoles.Student)" class="btn btn-soft" id="importUserLink"><i class="bi bi-file-earmark-excel me-1"></i>นำเข้าจาก Excel</a>
+            <a asp-action="Create" asp-route-role="@(active == "" ? null : active)" class="btn btn-primary" id="addUserLink"><i class="bi bi-plus-lg me-1"></i>เพิ่มผู้ใช้งาน</a>
+        </div>
+    </div>
+    <form id="userFilterForm" class="row g-2 align-items-end room-cascade" autocomplete="off">
+        <input type="hidden" name="role" id="uRole" value="@active">
+        <input type="hidden" name="isActive" id="uActive" value="@(Model.IsActive?.ToString().ToLowerInvariant())">
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="uQ">ค้นหา</label>
+            <input id="uQ" name="q" type="search" class="form-control" placeholder="ชื่อ อีเมล หรือรหัส">
+        </div>
+        <div class="col-6 col-md">
+            <label class="form-label" for="uDept">แผนก</label>
+            <select id="uDept" name="departmentId" class="form-select" data-cascade="dept" asp-items="Model.Departments"><option value="">ทุกแผนก</option></select>
+        </div>
+        <div class="col-6 col-md">
+            <label class="form-label" for="uGrade">ชั้นปี</label>
+            <select id="uGrade" name="gradeLevelId" class="form-select" data-cascade="grade" asp-items="Model.Grades"><option value="">ทุกชั้นปี</option></select>
+        </div>
+        <div class="col-12 col-md">
+            <label class="form-label" for="uRoom">ห้องเรียน</label>
+            <select id="uRoom" name="classroomId" class="form-select" data-cascade="room"><option value="">ทุกห้อง</option></select>
+        </div>
+    </form>
+</div>
+@if (Model.IsActive == true)
+{
+    <div class="preset-banner" id="activePreset">
+        <span><i class="bi bi-funnel me-1"></i>กำลังดู: <strong>ผู้ใช้งานที่เปิดใช้</strong></span>
+        <button type="button" class="btn btn-soft btn-sm" id="activeClear">ดูทั้งหมด</button>
+    </div>
+}
+<div id="userList" aria-live="polite">
+    <partial name="_UserList" model="Model.List" />
+</div>
+@section Scripts {
+    <script src="~/js/users.js" asp-append-version="true"></script>
+}

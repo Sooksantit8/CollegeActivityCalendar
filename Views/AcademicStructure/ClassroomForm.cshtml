@@ -1,0 +1,28 @@
+@model ClassroomFormViewModel
+@{ ViewData["Title"] = Model.Input.Id is null ? "เพิ่มห้องเรียน" : "แก้ไขห้องเรียน"; }
+<form asp-action="ClassroomForm" method="post" class="surface form-card form-narrow">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Input.Id">
+    <div class="mb-3">
+        <label asp-for="Input.AcademicYearId" class="form-label required"></label>
+        <select asp-for="Input.AcademicYearId" asp-items="Model.AcademicYears" class="form-select"><option value="">เลือกปีการศึกษา</option></select>
+        <span asp-validation-for="Input.AcademicYearId" class="invalid-text"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.GradeLevelId" class="form-label required"></label>
+        <select asp-for="Input.GradeLevelId" asp-items="Model.GradeLevels" class="form-select"><option value="">เลือกชั้นปี (ระดับการศึกษาตามชั้นปี)</option></select>
+        <span asp-validation-for="Input.GradeLevelId" class="invalid-text"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.DepartmentId" class="form-label required"></label>
+        <select asp-for="Input.DepartmentId" asp-items="Model.Departments" class="form-select"><option value="">เลือกแผนก</option></select>
+        <span asp-validation-for="Input.DepartmentId" class="invalid-text"></span>
+    </div>
+    <div class="mb-3"><label asp-for="Input.RoomNumber" class="form-label required"></label><input asp-for="Input.RoomNumber" class="form-control"><span asp-validation-for="Input.RoomNumber" class="invalid-text"></span></div>
+    <div class="mb-3">
+        <label asp-for="Input.AdvisorTeacherProfileId" class="form-label"></label>
+        <select asp-for="Input.AdvisorTeacherProfileId" asp-items="Model.Teachers" class="form-select"><option value="">ไม่กำหนด</option></select>
+    </div>
+    <div class="form-actions"><a asp-action="Index" asp-route-tab="classrooms" class="btn btn-soft">กลับ</a><button type="submit" class="btn btn-primary">บันทึก</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

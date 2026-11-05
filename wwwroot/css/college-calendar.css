@@ -1,0 +1,38 @@
+/* FullCalendar ตามโทนของระบบ และสีแยกระดับกลุ่มเป้าหมาย */
+.fc { --fc-border-color: #e6e8e5; --fc-today-bg-color: #fdf3ea; --fc-page-bg-color: #fff; --fc-button-bg-color: #eef1ef; --fc-button-border-color: transparent; --fc-button-text-color: #23323b; --fc-button-hover-bg-color: #dfe6e2; --fc-button-hover-border-color: transparent; --fc-button-active-bg-color: #172d3b; --fc-button-active-border-color: #172d3b; font-size: 14px; }
+.fc .fc-toolbar-title { font-size: 20px; font-weight: 700; }
+.fc .fc-button { border-radius: 9px; font-weight: 600; font-size: 13px; box-shadow: none !important; }
+.fc .fc-button-primary:not(:disabled).fc-button-active { color: #fff; }
+.fc .fc-button-primary:disabled { color: #23323b; }
+.fc .fc-col-header-cell-cushion { color: #5f6e78; font-weight: 600; text-decoration: none; }
+.fc .fc-daygrid-day-number { color: #23323b; text-decoration: none; }
+.fc .fc-event { border: 0; border-radius: 5px; padding: 1px 4px; cursor: pointer; font-size: 12.5px; }
+.fc-level-college { --fc-event-bg-color: #172d3b; --fc-event-text-color: #fff; --fc-event-border-color: #172d3b; background: #172d3b; color: #fff; }
+.fc-level-department { --fc-event-bg-color: #b9552f; --fc-event-text-color: #fff; --fc-event-border-color: #b9552f; background: #b9552f; color: #fff; }
+.fc-level-classroom { --fc-event-bg-color: #1a7a72; --fc-event-text-color: #fff; --fc-event-border-color: #1a7a72; background: #1a7a72; color: #fff; }
+.fc-level-individual { --fc-event-bg-color: #6a4bb5; --fc-event-text-color: #fff; --fc-event-border-color: #6a4bb5; background: #6a4bb5; color: #fff; }
+.fc-direction-ltr .fc-daygrid-event.fc-event-end { margin-right: 2px; }
+.fc .fc-daygrid-dot-event .fc-event-title, .fc .fc-daygrid-dot-event .fc-event-time { color: #fff; font-weight: 500; }
+.fc .fc-daygrid-event-dot { border-color: rgba(255, 255, 255, .85); }
+.fc .fc-daygrid-dot-event:hover, .fc .fc-daygrid-dot-event.fc-event-mirror { background: inherit; filter: brightness(1.12); }
+/* มุมมองรายการไม่ต้องลงสีทั้งแถว ใช้จุดสีแทน */
+.fc .fc-list-event { background: none; color: #23323b; }
+.fc .fc-list-event:hover td { background: #fbf5ef; }
+.fc-list-event.fc-level-college .fc-list-event-dot { border-color: #172d3b; }
+.fc-list-event.fc-level-department .fc-list-event-dot { border-color: #b9552f; }
+.fc-list-event.fc-level-classroom .fc-list-event-dot { border-color: #1a7a72; }
+.fc-list-event.fc-level-individual .fc-list-event-dot { border-color: #6a4bb5; }
+.fc .fc-list-event-title a { color: #23323b; text-decoration: none; }
+.fc-status-cancelled { opacity: .55; }
+.fc-status-cancelled .fc-event-title, .fc-status-cancelled .fc-list-event-title { text-decoration: line-through; }
+.fc-status-draft { outline: 2px dashed rgba(255, 255, 255, .7); outline-offset: -2px; }
+.fc-list-event.fc-status-draft { outline: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: #5f6e78; }
+@media (max-width: 767.98px) {
+    .fc .fc-toolbar { flex-direction: column; gap: 8px; }
+    .fc .fc-toolbar-title { font-size: 17px; }
+    .fc .fc-daygrid-day-frame { min-height: 62px; }
+    .fc .fc-event { font-size: 11px; }
+}
+.fc .fc-list-day-cushion { background: #fbfaf7; }
+.fc .fc-list-day-text, .fc .fc-list-day-side-text { color: #23323b; font-weight: 600; text-decoration: none; }

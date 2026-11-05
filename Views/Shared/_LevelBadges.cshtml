@@ -1,0 +1,5 @@
+@model List<EventTargetType>
+@foreach (var level in Model)
+{
+    <span class="level-pill level-@level.ToString().ToLowerInvariant()">@DisplayText.Level(level)</span>
+}

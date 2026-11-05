@@ -1,0 +1,27 @@
+@model List<AcademicHistoryRow>
+@if (Model.Count == 0)
+{
+    <div class="surface empty-state"><p>ยังไม่มีประวัติ</p></div>
+}
+else
+{
+    <div class="surface table-card">
+        <table class="table table-stack align-middle mb-0">
+            <thead><tr><th>วันที่</th><th>รายการ</th><th>ปีการศึกษา</th><th>ห้องเรียน</th><th>แผนก</th><th>สถานะ</th><th>ผู้ดำเนินการ</th></tr></thead>
+            <tbody>
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td data-label="วันที่">@h.CreatedAtText</td>
+                        <td data-label="รายการ"><strong>@h.ChangeText</strong>@if (!string.IsNullOrEmpty(h.Note)) { <div class="small text-muted-soft">@h.Note</div> }</td>
+                        <td data-label="ปีการศึกษา">@h.YearName</td>
+                        <td data-label="ห้องเรียน">@h.ClassroomName</td>
+                        <td data-label="แผนก">@h.DepartmentName</td>
+                        <td data-label="สถานะ">@h.StatusName</td>
+                        <td data-label="ผู้ดำเนินการ">@h.ChangedByName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,77 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "ภาพรวมระบบ";
+    ViewData["Subtitle"] = User.IsInRole(AppRoles.Student) ? "กิจกรรมและกำหนดการที่เกี่ยวข้องกับคุณ" : "ภาพรวมกิจกรรมของวิทยาลัยที่คุณรับผิดชอบ";
+}
+<section class="hero-panel">
+    <p class="hero-kicker">YOUR COLLEGE, IN SYNC</p>
+    <h2>@Model.HeroTitle</h2>
+    <p>@Model.HeroText</p>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <a asp-controller="Calendar" asp-action="Index" class="btn btn-primary"><i class="bi bi-calendar3 me-1"></i>เปิดปฏิทิน</a>
+        @if (Model.Form is not null)
+        {
+            <button type="button" class="btn btn-hero-soft" data-add-event><i class="bi bi-plus-lg me-1"></i>เพิ่มกิจกรรม</button>
+        }
+    </div>
+</section>
+
+<div class="stat-grid">
+    @foreach (var stat in Model.Stats)
+    {
+        <partial name="_StatCard" model="stat" />
+    }
+</div>
+
+<section class="stat-panel d-none" id="statPanel" aria-live="polite" tabindex="-1">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="section-title mb-0" id="statPanelTitle"></h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-soft btn-sm" id="statPanelFull" href="#">เปิดเต็มหน้า</a>
+            <button type="button" class="btn btn-soft btn-sm" id="statPanelClose"><i class="bi bi-x-lg me-1"></i>ปิด</button>
+        </div>
+    </div>
+    <div id="statPanelBody"></div>
+</section>
+
+<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+    <h2 class="section-title mb-0">กิจกรรมที่กำลังจะมาถึง</h2>
+    <a asp-controller="Events" asp-action="Index" class="link-accent">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+</div>
+@if (Model.Upcoming.Count == 0)
+{
+    <div class="surface empty-state"><i class="bi bi-calendar-x"></i><p>ยังไม่มีกิจกรรมในช่วงนี้</p></div>
+}
+else
+{
+    <div class="event-grid">
+        @foreach (var row in Model.Upcoming)
+        {
+            <partial name="_EventCard" model="row" />
+        }
+    </div>
+}
+
+@if (Model.NeedsAttention.Count > 0)
+{
+    <h2 class="section-title mt-4 mb-3">รอจัดการ <small>แบบร่างและกิจกรรมที่ตั้งเวลาไว้</small></h2>
+    <div class="event-grid">
+        @foreach (var row in Model.NeedsAttention)
+        {
+            <partial name="_EventCard" model="row" />
+        }
+    </div>
+}
+
+@section Modals {
+    <partial name="_EventDetailsModal" />
+    @if (Model.Form is not null)
+    {
+        <partial name="_EventModal" model="Model.Form" />
+    }
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/events.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

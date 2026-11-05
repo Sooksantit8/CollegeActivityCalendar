@@ -1,0 +1,31 @@
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="detailsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="min-w-0">
+                    <h2 class="modal-title h5" id="detailsTitle"></h2>
+                    <div class="d-flex flex-wrap gap-1 mt-1" id="detailsBadges"></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="detail-list">
+                    <dt>วันเวลา</dt><dd id="detailsDate"></dd>
+                    <dt>สถานที่</dt><dd id="detailsLocation"></dd>
+                    <dt>ประเภท</dt><dd id="detailsCategory"></dd>
+                    <dt>ผู้รับผิดชอบ</dt><dd id="detailsResponsible"></dd>
+                    <dt>กลุ่มเป้าหมาย</dt><dd id="detailsTargets"></dd>
+                    <dt class="manage-only">เผยแพร่เมื่อ</dt><dd class="manage-only" id="detailsPublish"></dd>
+                    <dt class="manage-only">สิ้นสุดการแสดงผล</dt><dd class="manage-only" id="detailsUntil"></dd>
+                </dl>
+                <div id="detailsDescription" class="details-description"></div>
+            </div>
+            <div class="modal-footer manage-only">
+                <button type="button" class="btn btn-soft-danger me-auto" id="detailsDelete"><i class="bi bi-trash me-1"></i>ลบ</button>
+                <button type="button" class="btn btn-soft" id="detailsCancel">ยกเลิกกิจกรรม</button>
+                <button type="button" class="btn btn-soft" id="detailsPublishBtn">เผยแพร่ทันที</button>
+                <button type="button" class="btn btn-primary" id="detailsEdit"><i class="bi bi-pencil me-1"></i>แก้ไข</button>
+            </div>
+        </div>
+    </div>
+</div>

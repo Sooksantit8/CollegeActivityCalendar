@@ -1,0 +1,212 @@
+@model EventFormOptions
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true" data-bs-backdrop="static" data-current-user="@Model.CurrentUserId">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-fullscreen-md-down">
+        <div class="modal-content">
+            <form id="eventForm" novalidate autocomplete="off">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="eventModalTitle">เพิ่มกิจกรรม</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="eventFormError" role="alert"></div>
+                    <input type="hidden" asp-for="Input.Id">
+
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <h3 class="form-section-title">ข้อมูลกิจกรรม</h3>
+                            <div class="mb-3">
+                                <label asp-for="Input.Title" class="form-label required"></label>
+                                <input asp-for="Input.Title" class="form-control">
+                                <span asp-validation-for="Input.Title" class="invalid-text"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Input.Description" class="form-label"></label>
+                                <textarea asp-for="Input.Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Input.Description" class="invalid-text"></span>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.ActivityCategoryId" class="form-label required"></label>
+                                    <select asp-for="Input.ActivityCategoryId" asp-items="Model.Categories" class="form-select">
+                                        <option value="">เลือกประเภท</option>
+                                    </select>
+                                    <span asp-validation-for="Input.ActivityCategoryId" class="invalid-text"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.ResponsibleUserId" class="form-label required"></label>
+                                    <select asp-for="Input.ResponsibleUserId" asp-items="Model.ResponsibleUsers" class="form-select">
+                                        <option value="">เลือกผู้รับผิดชอบ</option>
+                                    </select>
+                                    <span asp-validation-for="Input.ResponsibleUserId" class="invalid-text"></span>
+                                </div>
+                            </div>
+
+                            <h3 class="form-section-title">วันและเวลา</h3>
+                            <div class="row g-3 mb-2">
+                                <div class="col-6">
+                                    <label asp-for="Input.StartDate" class="form-label required"></label>
+                                    <input asp-for="Input.StartDate" class="form-control">
+                                    <span asp-validation-for="Input.StartDate" class="invalid-text"></span>
+                                </div>
+                                <div class="col-6">
+                                    <label asp-for="Input.EndDate" class="form-label required"></label>
+                                    <input asp-for="Input.EndDate" class="form-control">
+                                    <span asp-validation-for="Input.EndDate" class="invalid-text"></span>
+                                </div>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input asp-for="Input.IsAllDay" class="form-check-input">
+                                <label asp-for="Input.IsAllDay" class="form-check-label"></label>
+                            </div>
+                            <div class="row g-3 mb-3" id="eventTimeRow">
+                                <div class="col-6">
+                                    <label asp-for="Input.StartTime" class="form-label required"></label>
+                                    <input asp-for="Input.StartTime" class="form-control">
+                                    <span asp-validation-for="Input.StartTime" class="invalid-text"></span>
+                                </div>
+                                <div class="col-6">
+                                    <label asp-for="Input.EndTime" class="form-label required"></label>
+                                    <input asp-for="Input.EndTime" class="form-control">
+                                    <span asp-validation-for="Input.EndTime" class="invalid-text"></span>
+                                </div>
+                            </div>
+
+                            <h3 class="form-section-title">สถานที่</h3>
+                            <div class="row g-3 mb-2">
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.LocationId" class="form-label"></label>
+                                    <select asp-for="Input.LocationId" asp-items="Model.Locations" class="form-select">
+                                        <option value="">ไม่ระบุ</option>
+                                    </select>
+                                    <span asp-validation-for="Input.LocationId" class="invalid-text"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.LocationText" class="form-label"></label>
+                                    <input asp-for="Input.LocationText" class="form-control">
+                                    <span asp-validation-for="Input.LocationText" class="invalid-text"></span>
+                                </div>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input asp-for="Input.IsOnline" class="form-check-input">
+                                <label asp-for="Input.IsOnline" class="form-check-label"></label>
+                            </div>
+                            <div class="mb-3 d-none" id="eventOnlineRow">
+                                <label asp-for="Input.OnlineUrl" class="form-label"></label>
+                                <input asp-for="Input.OnlineUrl" class="form-control" placeholder="https://">
+                                <span asp-validation-for="Input.OnlineUrl" class="invalid-text"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <h3 class="form-section-title">การเผยแพร่</h3>
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-12">
+                                    <label asp-for="Input.Status" class="form-label required"></label>
+                                    <select asp-for="Input.Status" asp-items="Model.Statuses" class="form-select"></select>
+                                    <span asp-validation-for="Input.Status" class="invalid-text"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.PublishAt" class="form-label"></label>
+                                    <input asp-for="Input.PublishAt" class="form-control">
+                                    <span asp-validation-for="Input.PublishAt" class="invalid-text"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label asp-for="Input.DisplayUntil" class="form-label"></label>
+                                    <input asp-for="Input.DisplayUntil" class="form-control">
+                                    <span asp-validation-for="Input.DisplayUntil" class="invalid-text"></span>
+                                </div>
+                            </div>
+
+                            <h3 class="form-section-title required">กลุ่มเป้าหมาย <small>เลือกได้หลายระดับ</small></h3>
+                            <div class="invalid-text d-block mb-2 d-none" id="targetError"></div>
+
+                            @if (Model.CanTargetCollege)
+                            {
+                                <div class="target-box">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="targetCollege">
+                                        <label class="form-check-label fw-semibold" for="targetCollege">
+                                            <span class="level-dot level-college"></span>วิทยาลัย — ทุกคนในวิทยาลัย
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="target-box text-muted-soft small" id="targetCollegeLocked">
+                                    <i class="bi bi-lock me-1"></i>ครูไม่สามารถกำหนดกลุ่มเป้าหมายระดับวิทยาลัยได้
+                                </div>
+                            }
+
+                            <div class="target-box">
+                                <div class="target-title"><span class="level-dot level-department"></span>แผนก</div>
+                                @if (Model.Departments.Count == 0)
+                                {
+                                    <p class="text-muted-soft small mb-0"><i class="bi bi-lock me-1"></i>คุณไม่ได้ดูแลทั้งแผนก เลือกเป้าหมายเป็นห้องเรียนหรือบุคคลแทน</p>
+                                }
+                                <div class="check-grid" id="targetDepartments">
+                                    @foreach (var d in Model.Departments)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input target-dept" type="checkbox" id="td@(d.Value)" value="@d.Value">
+                                            <label class="form-check-label" for="td@(d.Value)">@d.Text</label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="target-box">
+                                <div class="target-title"><span class="level-dot level-classroom"></span>ห้องเรียน</div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <select id="trYear" class="form-select form-select-sm" aria-label="ปีการศึกษา" asp-items="Model.AcademicYears"></select>
+                                    </div>
+                                    <div class="col-6">
+                                        <select id="trLevel" class="form-select form-select-sm" aria-label="ระดับการศึกษา" asp-items="Model.EducationLevels">
+                                            <option value="">ทุกระดับ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <select id="trGrade" class="form-select form-select-sm" aria-label="ชั้นปี" asp-items="Model.GradeLevels">
+                                            <option value="">ทุกชั้นปี</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <select id="trDept" class="form-select form-select-sm" aria-label="แผนก" asp-items="Model.RoomDepartments">
+                                            <option value="">ทุกแผนก</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pick-list" id="trList"><p class="text-muted-soft small mb-0 p-2">กำลังโหลด...</p></div>
+                                <div class="chip-list mt-2" id="trChips"></div>
+                            </div>
+
+                            <div class="target-box">
+                                <div class="target-title"><span class="level-dot level-individual"></span>บุคคล</div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-5">
+                                        <select id="tuRole" class="form-select form-select-sm" aria-label="ประเภทบุคคล">
+                                            <option value="">ทุกประเภท</option>
+                                            <option value="Student">นักเรียน</option>
+                                            <option value="Teacher">ครู</option>
+                                            <option value="Staff">เจ้าหน้าที่</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-7">
+                                        <input id="tuSearch" type="search" class="form-control form-control-sm" placeholder="ค้นหาชื่อ อีเมล รหัส" aria-label="ค้นหาบุคคล">
+                                    </div>
+                                </div>
+                                <div class="pick-list" id="tuList"></div>
+                                <div class="chip-list mt-2" id="tuChips"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-soft" data-bs-dismiss="modal">ปิด</button>
+                    <button type="submit" class="btn btn-primary" id="eventSaveButton"><i class="bi bi-check2 me-1"></i>บันทึกกิจกรรม</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

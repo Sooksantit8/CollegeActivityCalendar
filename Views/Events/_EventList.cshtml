@@ -1,0 +1,54 @@
+@model EventListViewModel
+@if (Model.Items.Count == 0)
+{
+    <div class="surface empty-state"><i class="bi bi-search"></i><p>ไม่พบกิจกรรมที่ตรงกับเงื่อนไข</p></div>
+}
+else
+{
+    <div class="surface table-card">
+        <table class="table table-stack align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>กิจกรรม</th>
+                    <th>วันเวลา</th>
+                    <th>สถานที่</th>
+                    <th>ระดับ</th>
+                    <th>สถานะ</th>
+                    <th class="text-end">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.Items)
+                {
+                    <tr>
+                        <td data-label="กิจกรรม">
+                            <button type="button" class="btn-link-title" data-event-details="@e.Id">@e.Title</button>
+                            <div class="small text-muted-soft"><span class="color-dot" style="background:@e.CategoryColor"></span>@e.CategoryName · @e.ResponsibleName</div>
+                        </td>
+                        <td data-label="วันเวลา">@e.DateText</td>
+                        <td data-label="สถานที่">@e.LocationText</td>
+                        <td data-label="ระดับ"><div class="d-flex flex-wrap gap-1"><partial name="_LevelBadges" model="e.Levels" /></div></td>
+                        <td data-label="สถานะ"><partial name="_StatusBadge" model="e.Status" /></td>
+                        <td class="text-end text-nowrap" data-label="จัดการ">
+                            <button type="button" class="btn btn-soft btn-sm" data-event-details="@e.Id" aria-label="ดูรายละเอียด @e.Title"><i class="bi bi-eye"></i></button>
+                            @if (e.CanManage)
+                            {
+                                <button type="button" class="btn btn-soft btn-sm" data-edit-event="@e.Id" aria-label="แก้ไข @e.Title"><i class="bi bi-pencil"></i></button>
+                                @if (e.Status is EventStatus.Draft or EventStatus.Scheduled)
+                                {
+                                    <button type="button" class="btn btn-soft btn-sm" data-event-action="Publish" data-id="@e.Id" data-title="@e.Title" aria-label="เผยแพร่ @e.Title"><i class="bi bi-send"></i></button>
+                                }
+                                @if (e.Status != EventStatus.Cancelled)
+                                {
+                                    <button type="button" class="btn btn-soft btn-sm" data-event-action="Cancel" data-id="@e.Id" data-title="@e.Title" aria-label="ยกเลิก @e.Title"><i class="bi bi-slash-circle"></i></button>
+                                }
+                                <button type="button" class="btn btn-soft-danger btn-sm" data-event-action="Delete" data-id="@e.Id" data-title="@e.Title" aria-label="ลบ @e.Title"><i class="bi bi-trash"></i></button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+<partial name="_Pagination" model="(Model.Page, Model.TotalPages, Model.TotalCount)" />

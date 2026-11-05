@@ -1,0 +1,23 @@
+@model GradeLevelFormViewModel
+@{ ViewData["Title"] = Model.Input.Id is null ? "เพิ่มชั้นปี" : "แก้ไขชั้นปี"; }
+<form asp-action="GradeForm" method="post" class="surface form-card form-narrow">
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="Input.Id">
+    <div class="mb-3">
+        <label asp-for="Input.EducationLevelId" class="form-label required"></label>
+        <select asp-for="Input.EducationLevelId" asp-items="Model.EducationLevels" class="form-select"><option value="">เลือกระดับการศึกษา</option></select>
+        <span asp-validation-for="Input.EducationLevelId" class="invalid-text"></span>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-4"><label asp-for="Input.YearNumber" class="form-label required"></label><input asp-for="Input.YearNumber" class="form-control"><span asp-validation-for="Input.YearNumber" class="invalid-text"></span></div>
+        <div class="col-8"><label asp-for="Input.Name" class="form-label required"></label><input asp-for="Input.Name" class="form-control" placeholder="เช่น ปวช.1"><span asp-validation-for="Input.Name" class="invalid-text"></span></div>
+    </div>
+    <h2 class="form-section-title">กติกาการเลื่อนชั้นเริ่มต้น</h2>
+    <div class="mb-3">
+        <label asp-for="Input.NextGradeLevelId" class="form-label"></label>
+        <select asp-for="Input.NextGradeLevelId" asp-items="Model.GradeLevels" class="form-select"><option value="">ไม่กำหนด</option></select>
+    </div>
+    <div class="form-check mb-3"><input asp-for="Input.IsFinal" class="form-check-input"><label asp-for="Input.IsFinal" class="form-check-label"></label></div>
+    <div class="form-actions"><a asp-action="Index" asp-route-tab="grades" class="btn btn-soft">กลับ</a><button type="submit" class="btn btn-primary">บันทึก</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,16 @@
+@model List<DepartmentStudentRow>
+<div class="table-responsive mt-2">
+    <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th></tr></thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.Code</td>
+                    <td class="text-nowrap"><a asp-controller="Users" asp-action="Details" asp-route-id="@s.UserId" class="btn-link-title fw-semibold">@s.Name</a></td>
+                    <td class="text-nowrap">@s.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,11 @@
+@using CollegeActivityCalendar.Services
+@inject ISettingsService Settings
+@inject IClock Clock
+@{ var s = await Settings.GetAsync(); }
+<footer class="app-footer">
+    <span>© @(Clock.Today.Year + 543) @s.CollegeName</span>
+    @if (!string.IsNullOrEmpty(s.ContactEmail) || !string.IsNullOrEmpty(s.ContactPhone))
+    {
+        <span>ติดต่อ: @s.ContactEmail @s.ContactPhone</span>
+    }
+</footer>
