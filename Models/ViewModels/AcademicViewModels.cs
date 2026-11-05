@@ -5,9 +5,9 @@ namespace CollegeActivityCalendar.Models.ViewModels;
 
 public abstract class DateRangeInput : IValidatableObject
 {
-    [Display(Name = "วันที่เริ่ม"), Required(ErrorMessage = "กรุณาเลือกวันที่เริ่ม")]
+    [Display(Name = "วันที่เริ่ม"), DataType(DataType.Date), Required(ErrorMessage = "กรุณาเลือกวันที่เริ่ม")]
     public DateOnly? StartDate { get; set; }
-    [Display(Name = "วันที่สิ้นสุด"), Required(ErrorMessage = "กรุณาเลือกวันที่สิ้นสุด")]
+    [Display(Name = "วันที่สิ้นสุด"), DataType(DataType.Date), Required(ErrorMessage = "กรุณาเลือกวันที่สิ้นสุด")]
     public DateOnly? EndDate { get; set; }
     public IEnumerable<ValidationResult> Validate(ValidationContext context)
     {
