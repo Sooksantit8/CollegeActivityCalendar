@@ -9,7 +9,7 @@ namespace CollegeActivityCalendar.Services;
 public interface ILookupService
 {
     Task<List<SelectListItem>> DepartmentsAsync(bool activeOnly = true);
-    Task<List<SelectListItem>> CategoriesAsync();
+    Task<List<SelectListItem>> CategoriesAsync(bool activeOnly = true);
     Task<List<SelectListItem>> LocationsAsync();
     Task<List<SelectListItem>> ResponsibleUsersAsync();
     Task<List<SelectListItem>> AcademicYearsAsync(bool selectCurrent = false);
@@ -28,8 +28,8 @@ public class LookupService(ApplicationDbContext db) : ILookupService
         await db.Departments.AsNoTracking().Where(d => !activeOnly || d.IsActive).OrderBy(d => d.Name)
             .Select(d => new SelectListItem(d.Name, d.Id.ToString())).ToListAsync();
 
-    public async Task<List<SelectListItem>> CategoriesAsync() =>
-        await db.ActivityCategories.AsNoTracking().Where(c => c.IsActive).OrderBy(c => c.Name)
+    public async Task<List<SelectListItem>> CategoriesAsync(bool activeOnly = true) =>
+        await db.ActivityCategories.AsNoTracking().Where(c => !activeOnly || c.IsActive).OrderBy(c => c.Name)
             .Select(c => new SelectListItem(c.Name, c.Id.ToString())).ToListAsync();
 
     public async Task<List<SelectListItem>> LocationsAsync() =>

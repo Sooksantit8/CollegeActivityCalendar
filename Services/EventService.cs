@@ -23,7 +23,7 @@ public interface IEventService
     Task<List<UserOption>> SearchTargetUsersAsync(string? role, string? q);
     Task<int> PublishDueEventsAsync();
     Task<EventFormOptions> GetFormOptionsAsync();
-    Task<EventFilterOptions> GetFilterOptionsAsync();
+    Task<EventFilterOptions> GetFilterOptionsAsync(EventFilter? current = null);
     Task<List<EventRow>> ToRowsAsync(List<Event> events, UserScope scope);
 }
 
@@ -349,10 +349,10 @@ public class EventService(
         };
     }
 
-    public async Task<EventFilterOptions> GetFilterOptionsAsync()
+    public async Task<EventFilterOptions> GetFilterOptionsAsync(EventFilter? current = null)
     {
         var scope = await scopes.GetAsync();
-        return new EventFilterOptions
+        var options = new EventFilterOptions
         {
             Departments = await lookups.DepartmentsAsync(),
             GradeLevels = await lookups.GradeLevelsAsync(),
@@ -361,6 +361,12 @@ public class EventService(
             Statuses = lookups.EventStatuses(),
             ShowStatus = !scope.IsStudent
         };
+        // รายงานนับแผนกและประเภทที่ปิดใช้งานด้วย จึงต้องเลือกค่าเดิมได้ มิฉะนั้นตัวกรองจะหายเมื่อเปลี่ยนหน้า
+        if (current?.DepartmentId is { } departmentId && options.Departments.All(d => d.Value != departmentId.ToString()))
+            options.Departments = await lookups.DepartmentsAsync(activeOnly: false);
+        if (current?.CategoryId is { } categoryId && options.Categories.All(c => c.Value != categoryId.ToString()))
+            options.Categories = await lookups.CategoriesAsync(activeOnly: false);
+        return options;
     }
 
     public async Task<List<EventRow>> ToRowsAsync(List<Event> items, UserScope scope)
@@ -401,6 +407,11 @@ public class EventService(
         if (f.To is not null) q = q.Where(e => e.StartDate <= f.To);
         if (f.StartsAfter is not null) q = q.Where(e => e.StartDate > f.StartsAfter);
         if (f.ActiveOnly) q = q.Where(e => e.Status != EventStatus.Cancelled);
+        if (f.StartFrom is not null) q = q.Where(e => e.StartDate >= f.StartFrom);
+        if (f.StartTo is not null) q = q.Where(e => e.StartDate <= f.StartTo);
+        if (f.PendingOnly && !scope.IsStudent) q = q.Where(e => e.Status == EventStatus.Draft || e.Status == EventStatus.Scheduled);
+        if (f.TargetDepartmentId is not null)
+            q = q.Where(e => e.Targets.Any(t => t.Departments.Any(d => d.DepartmentId == f.TargetDepartmentId)));
         if (f.Level is not null) q = q.Where(e => e.Targets.Any(t => t.TargetType == f.Level));
         if (f.DepartmentId is not null)
         {

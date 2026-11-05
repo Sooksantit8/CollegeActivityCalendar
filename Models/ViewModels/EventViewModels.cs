@@ -131,6 +131,13 @@ public class EventFilter
     public bool ActiveOnly { get; set; }
     /// <summary>เฉพาะกิจกรรมที่ผู้ใช้จัดการได้</summary>
     public bool ManageableOnly { get; set; }
+    /// <summary>เริ่มตั้งแต่วันนี้เป็นต้นไป ต่างจาก From ที่นับกิจกรรมที่คาบเกี่ยวช่วงเวลา</summary>
+    public DateOnly? StartFrom { get; set; }
+    public DateOnly? StartTo { get; set; }
+    /// <summary>กำหนดเป้าหมายเป็นแผนกนี้โดยตรง ไม่นับกิจกรรมที่เลือกเป็นรายห้อง</summary>
+    public int? TargetDepartmentId { get; set; }
+    /// <summary>เฉพาะแบบร่างและที่ตั้งเวลาเผยแพร่</summary>
+    public bool PendingOnly { get; set; }
     /// <summary>ชื่อการ์ดในหน้าภาพรวมที่พามาหน้านี้ ใช้แสดงข้อความเท่านั้น</summary>
     public string? Preset { get; set; }
     public int Page { get; set; } = 1;

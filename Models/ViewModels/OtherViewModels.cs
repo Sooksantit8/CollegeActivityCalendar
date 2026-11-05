@@ -144,10 +144,15 @@ public class ReportBar
     public string Label { get; set; } = string.Empty;
     public int Count { get; set; }
     public string? Color { get; set; }
+    /// <summary>ใช้จำแถบที่เปิดไว้หลังโหลดหน้าใหม่ แม้ลำดับแถบเปลี่ยน</summary>
+    public string? Key { get; set; }
+    /// <summary>ตัวกรองรายการกิจกรรมเมื่อคลิกแถบ ไม่ระบุ = คลิกไม่ได้</summary>
+    public Dictionary<string, string>? LinkValues { get; set; }
 }
 
 public class ReportViewModel
 {
+    public EventFormOptions Form { get; set; } = new();
     [Display(Name = "ตั้งแต่วันที่")] public DateOnly From { get; set; }
     [Display(Name = "ถึงวันที่")] public DateOnly To { get; set; }
     [Display(Name = "แผนก")] public int? DepartmentId { get; set; }

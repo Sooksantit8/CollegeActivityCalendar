@@ -44,6 +44,11 @@
         <input type="hidden" name="startsAfter" value="@current.StartsAfter?.ToString("yyyy-MM-dd")">
         <input type="hidden" name="activeOnly" value="@(current.ActiveOnly ? "true" : "")">
         <input type="hidden" name="manageableOnly" value="@(current.ManageableOnly ? "true" : "")">
+        <input type="hidden" name="level" value="@current.Level">
+        <input type="hidden" name="startFrom" value="@current.StartFrom?.ToString("yyyy-MM-dd")">
+        <input type="hidden" name="startTo" value="@current.StartTo?.ToString("yyyy-MM-dd")">
+        <input type="hidden" name="targetDepartmentId" value="@current.TargetDepartmentId">
+        <input type="hidden" name="pendingOnly" value="@(current.PendingOnly ? "true" : "")">
     }
     <div class="col-auto">
         <button type="reset" class="btn btn-soft" id="filterReset"><i class="bi bi-arrow-counterclockwise me-1"></i>ล้าง</button>

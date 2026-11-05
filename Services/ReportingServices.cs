@@ -141,15 +141,16 @@ public class ReportService(ApplicationDbContext db, ILookupService lookups, IStu
 
         var total = await q.CountAsync();
         var byStatus = await q.GroupBy(e => e.Status).Select(g => new { g.Key, Count = g.Count() }).ToListAsync();
-        var byCategory = await q.GroupBy(e => new { e.ActivityCategory.Name, e.ActivityCategory.Color })
-            .Select(g => new { g.Key.Name, g.Key.Color, Count = g.Count() }).OrderByDescending(x => x.Count).ToListAsync();
+        var byCategory = await q.GroupBy(e => new { e.ActivityCategoryId, e.ActivityCategory.Name, e.ActivityCategory.Color })
+            .Select(g => new { Id = g.Key.ActivityCategoryId, g.Key.Name, g.Key.Color, Count = g.Count() }).OrderByDescending(x => x.Count).ToListAsync();
         var byMonth = await q.GroupBy(e => new { e.StartDate.Year, e.StartDate.Month })
             .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() }).OrderBy(x => x.Year).ThenBy(x => x.Month).ToListAsync();
         var eventIds = q.Select(e => e.Id);
         var byLevel = await db.EventTargets.AsNoTracking().Where(x => eventIds.Contains(x.EventId))
-            .GroupBy(x => x.TargetType).Select(g => new { g.Key, Count = g.Count() }).ToListAsync();
+            .GroupBy(x => x.TargetType).Select(g => new { g.Key, Count = g.Select(y => y.EventId).Distinct().Count() }).ToListAsync();
         var byDept = await db.EventTargetDepartments.AsNoTracking().Where(x => eventIds.Contains(x.EventTarget.EventId))
-            .GroupBy(x => x.Department.Name).Select(g => new { g.Key, Count = g.Select(y => y.EventTarget.EventId).Distinct().Count() })
+            .GroupBy(x => new { x.DepartmentId, x.Department.Name })
+            .Select(g => new { g.Key.DepartmentId, g.Key.Name, Count = g.Select(y => y.EventTarget.EventId).Distinct().Count() })
             .OrderByDescending(x => x.Count).Take(12).ToListAsync();
         var students = await db.StudentProfiles.AsNoTracking().Where(s => s.StudentStatus.IsEnrolled)
             .Where(s => departmentId == null || s.DepartmentId == departmentId)
@@ -157,6 +158,20 @@ public class ReportService(ApplicationDbContext db, ILookupService lookups, IStu
             .OrderByDescending(x => x.Count).ToListAsync();
 
         int Status(EventStatus s) => byStatus.FirstOrDefault(x => x.Key == s)?.Count ?? 0;
+
+        // เงื่อนไขของลิงก์ต้องตรงกับที่นับด้านบน ตัวเลขจึงเท่ากับจำนวนในรายการที่คลิกดู
+        static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        Dictionary<string, string> Link(params (string Key, string Value)[] extra)
+        {
+            var values = new Dictionary<string, string> { ["preset"] = "report", ["from"] = Iso(f), ["to"] = Iso(t) };
+            if (departmentId is not null) values["departmentId"] = departmentId.Value.ToString(CultureInfo.InvariantCulture);
+            foreach (var (key, value) in extra) values[key] = value;
+            return values;
+        }
+        StatCardViewModel Card(string label, int count, string icon, params (string Key, string Value)[] extra) => new()
+        {
+            Label = label, Value = count.ToString("N0"), Icon = icon, LinkController = "Events", LinkValues = Link(extra)
+        };
 
         return new ReportViewModel
         {
@@ -166,16 +181,34 @@ public class ReportService(ApplicationDbContext db, ILookupService lookups, IStu
             Departments = await lookups.DepartmentsAsync(activeOnly: false),
             Stats =
             [
-                new() { Label = "กิจกรรมทั้งหมด", Value = total.ToString("N0"), Icon = "bi-calendar3" },
-                new() { Label = "เผยแพร่แล้ว", Value = Status(EventStatus.Published).ToString("N0"), Icon = "bi-check2-circle" },
-                new() { Label = "แบบร่าง / ตั้งเวลา", Value = (Status(EventStatus.Draft) + Status(EventStatus.Scheduled)).ToString("N0"), Icon = "bi-pencil-square" },
-                new() { Label = "ยกเลิก", Value = Status(EventStatus.Cancelled).ToString("N0"), Icon = "bi-x-circle" }
+                Card("กิจกรรมทั้งหมด", total, "bi-calendar3"),
+                Card("เผยแพร่แล้ว", Status(EventStatus.Published), "bi-check2-circle", ("status", nameof(EventStatus.Published))),
+                Card("แบบร่าง / ตั้งเวลา", Status(EventStatus.Draft) + Status(EventStatus.Scheduled), "bi-pencil-square", ("pendingOnly", "true")),
+                Card("ยกเลิก", Status(EventStatus.Cancelled), "bi-x-circle", ("status", nameof(EventStatus.Cancelled)))
             ],
-            ByMonth = byMonth.Select(x => new ReportBar { Label = ThaiDate.MonthYear(x.Year, x.Month), Count = x.Count }).ToList(),
-            ByCategory = byCategory.Select(x => new ReportBar { Label = x.Name, Count = x.Count, Color = x.Color }).ToList(),
-            ByLevel = byLevel.OrderBy(x => x.Key).Select(x => new ReportBar { Label = DisplayText.Level(x.Key), Count = x.Count }).ToList(),
-            ByStatus = byStatus.OrderBy(x => x.Key).Select(x => new ReportBar { Label = DisplayText.Status(x.Key), Count = x.Count }).ToList(),
-            ByDepartment = byDept.Select(x => new ReportBar { Label = x.Key, Count = x.Count }).ToList(),
+            ByMonth = byMonth.Select(x => new ReportBar
+            {
+                Label = ThaiDate.MonthYear(x.Year, x.Month), Count = x.Count, Key = $"month-{x.Year}-{x.Month}",
+                LinkValues = Link(("startFrom", Iso(new DateOnly(x.Year, x.Month, 1))), ("startTo", Iso(new DateOnly(x.Year, x.Month, 1).AddMonths(1).AddDays(-1))))
+            }).ToList(),
+            ByCategory = byCategory.Select(x => new ReportBar
+            {
+                Label = x.Name, Count = x.Count, Color = x.Color, Key = $"category-{x.Id}",
+                LinkValues = Link(("categoryId", x.Id.ToString(CultureInfo.InvariantCulture)))
+            }).ToList(),
+            ByLevel = byLevel.OrderBy(x => x.Key).Select(x => new ReportBar
+            {
+                Label = DisplayText.Level(x.Key), Count = x.Count, Key = $"level-{x.Key}", LinkValues = Link(("level", x.Key.ToString()))
+            }).ToList(),
+            ByStatus = byStatus.OrderBy(x => x.Key).Select(x => new ReportBar
+            {
+                Label = DisplayText.Status(x.Key), Count = x.Count, Key = $"status-{x.Key}", LinkValues = Link(("status", x.Key.ToString()))
+            }).ToList(),
+            ByDepartment = byDept.Select(x => new ReportBar
+            {
+                Label = x.Name, Count = x.Count, Key = $"department-{x.DepartmentId}",
+                LinkValues = Link(("targetDepartmentId", x.DepartmentId.ToString(CultureInfo.InvariantCulture)))
+            }).ToList(),
             StudentsByDepartment = students.Select(x => new ReportBar { Label = x.Key, Count = x.Count }).ToList(),
             RecentPromotions = await promotions.GetHistoryAsync(5)
         };

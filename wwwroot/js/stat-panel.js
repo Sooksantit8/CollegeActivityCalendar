@@ -1,4 +1,4 @@
-/* การ์ดสรุป: คลิกแล้วแสดงรายการในหน้าภาพรวมโดยไม่เปลี่ยนหน้า */
+/* การ์ดและแถบสรุป: คลิกแล้วแสดงรายการในหน้าเดิมโดยไม่เปลี่ยนหน้า ใช้ในหน้าภาพรวมและรายงาน */
 $(function () {
     'use strict';
     const $cards = $('[data-stat-list]');
@@ -23,9 +23,13 @@ $(function () {
             .always(function () { if (id === requestId) $body.removeAttr('aria-busy'); });
     }
 
-    function setHash(index) {
+    function keyOf($card) {
+        return $card.attr('data-stat-key') || String($cards.index($card));
+    }
+
+    function setHash(key) {
         // จำการ์ดที่เปิดไว้ เพื่อให้แสดงต่อหลังหน้ารีเฟรช เช่น หลังแก้ไขกิจกรรม
-        history.replaceState(null, '', location.pathname + location.search + (index === null ? '' : '#card=' + index));
+        history.replaceState(null, '', location.pathname + location.search + (key === null ? '' : '#card=' + key));
     }
 
     function close() {
@@ -44,7 +48,7 @@ $(function () {
         $('#statPanelFull').attr('href', $card.attr('href'));
         $body.empty().append('<p class="text-muted-soft mb-0 py-3 text-center">กำลังโหลด...</p>');
         $panel.removeClass('d-none');
-        setHash($cards.index($card));
+        setHash(keyOf($card));
         load(1);
         if (scroll) {
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -72,6 +76,9 @@ $(function () {
     // เพิ่ม แก้ไข หรือยกเลิกกิจกรรมแล้ว ตัวเลขบนการ์ดเปลี่ยน จึงโหลดหน้าใหม่
     $(document).on('event:changed', function () { window.setTimeout(function () { location.reload(); }, 400); });
 
-    const match = /^#card=(\d+)$/.exec(location.hash);
-    if (match && $cards.eq(Number(match[1])).length) open($cards.eq(Number(match[1])), false);
+    const match = /^#card=([\w-]+)$/.exec(location.hash);
+    if (match) {
+        const $saved = $cards.filter(function () { return keyOf($(this)) === match[1]; }).first();
+        if ($saved.length) open($saved, false);
+    }
 });

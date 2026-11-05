@@ -22,6 +22,7 @@
 <div class="stat-grid">
     @foreach (var stat in Model.Stats) { <partial name="_StatCard" model="stat" /> }
 </div>
+<partial name="_StatPanel" />
 <div class="row g-3 mb-3">
     <div class="col-lg-6">@await Html.PartialAsync("_Bars", ("กิจกรรมตามเดือน", "กิจกรรม", Model.ByMonth))</div>
     <div class="col-lg-6">@await Html.PartialAsync("_Bars", ("กิจกรรมตามประเภท", "กิจกรรม", Model.ByCategory))</div>
@@ -51,4 +52,14 @@ else
             </tbody>
         </table>
     </div>
+}
+
+@section Modals {
+    <partial name="_EventDetailsModal" />
+    <partial name="_EventModal" model="Model.Form" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/events.js" asp-append-version="true"></script>
+    <script src="~/js/stat-panel.js" asp-append-version="true"></script>
 }

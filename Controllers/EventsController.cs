@@ -11,7 +11,7 @@ public class EventsController(IEventService events) : AppController
     public async Task<IActionResult> Index([FromQuery] EventFilter filter)
     {
         var canManage = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Staff) || User.IsInRole(AppRoles.Teacher);
-        var options = await events.GetFilterOptionsAsync();
+        var options = await events.GetFilterOptionsAsync(filter);
         options.Current = filter;
         Mark(options.Departments, filter.DepartmentId?.ToString());
         Mark(options.GradeLevels, filter.GradeLevelId?.ToString());

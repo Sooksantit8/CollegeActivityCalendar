@@ -201,6 +201,10 @@ button.pick-item:hover { background: var(--accent-tint); }
 .bar-track { height: 8px; border-radius: 4px; background: #eff1ee; }
 .bar-fill { height: 100%; border-radius: 0 4px 4px 0; background: var(--accent); min-width: 2px; }
 .bar-list li:hover .bar-fill { background: var(--accent-dark); }
+.bar-link { display: block; margin: -6px -8px; padding: 6px 8px; border-radius: 8px; color: inherit; text-decoration: none; transition: background-color .15s; }
+.bar-link:hover, .bar-link:focus-visible { color: inherit; background: var(--accent-tint); }
+.bar-link.active { background: var(--accent-tint); box-shadow: inset 0 0 0 1px var(--accent); }
+.bar-link.active .stat-arrow { transform: rotate(180deg); }
 
 /* หน้าเข้าสู่ระบบและหน้าสถานะ */
 .auth-body { background: var(--paper); }
@@ -282,4 +286,4 @@ button.pick-item:hover { background: var(--accent-tint); }
 .stat-link.active .stat-arrow { transform: rotate(180deg); }
 .stat-arrow { display: inline-block; transition: transform .15s; }
 .stat-panel { margin-bottom: 24px; outline: none; }
-@media (prefers-reduced-motion: reduce) { .stat-arrow, .stat-link { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .stat-arrow, .stat-link, .bar-link { transition: none; } }
