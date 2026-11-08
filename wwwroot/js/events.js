@@ -174,7 +174,7 @@
             this.el('OnlineUrl').val(e.onlineUrl);
             this.el('Status').val(e.status);
             this.el('PublishAt').val(e.publishAt ? e.publishAt.slice(0, 16) : '');
-            this.el('DisplayUntil').val(e.displayUntil || '');
+            this.el('DisplayUntil').val(e.displayUntil ? e.displayUntil.slice(0, 16) : '');
 
             const t = e.targets;
             // ครูไม่มีช่องเลือกระดับวิทยาลัย แต่ถ้าได้รับมอบหมายกิจกรรมระดับนี้ ต้องคงเป้าหมายเดิมไว้
@@ -370,7 +370,7 @@
             }
             if (!d.isOnline && !d.locationId && !(d.locationText || '').trim()) errors.LocationId = 'กรุณาระบุสถานที่ หรือเลือกว่าจัดแบบออนไลน์';
             if (d.status === 'Scheduled' && !d.publishAt) errors.PublishAt = 'สถานะตั้งเวลาเผยแพร่ต้องระบุวันเวลาเผยแพร่';
-            if (d.displayUntil && d.publishAt && d.displayUntil < d.publishAt.slice(0, 10)) errors.DisplayUntil = 'วันที่สิ้นสุดการแสดงผลต้องไม่ก่อนวันเผยแพร่';
+            if (d.displayUntil && d.publishAt && d.displayUntil < d.publishAt) errors.DisplayUntil = 'วันเวลาสิ้นสุดการแสดงผลต้องไม่ก่อนวันเวลาเผยแพร่';
             const t = d.targets;
             if (!t.college && !t.departmentIds.length && !t.classroomIds.length && !t.userIds.length) errors.Targets = 'กรุณาเลือกกลุ่มเป้าหมายอย่างน้อยหนึ่งรายการ';
             return errors;

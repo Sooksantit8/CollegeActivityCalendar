@@ -291,8 +291,8 @@ namespace CollegeActivityCalendar.Data.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<DateOnly?>("DisplayUntil")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("DisplayUntil")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");

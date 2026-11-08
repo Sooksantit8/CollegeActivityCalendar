@@ -109,7 +109,6 @@ public class EventAccessService(ApplicationDbContext db, IClock clock) : IEventA
     {
         if (s.IsAdmin) return source;
         var now = clock.Now;
-        var today = clock.Today;
         var uid = s.UserId;
         var departments = s.DepartmentIds;
         var classrooms = s.ClassroomIds;
@@ -119,7 +118,7 @@ public class EventAccessService(ApplicationDbContext db, IClock clock) : IEventA
             return source.Where(e =>
                 (e.Status == EventStatus.Published || e.Status == EventStatus.Scheduled)
                 && (e.PublishAt == null || e.PublishAt <= now)
-                && (e.DisplayUntil == null || e.DisplayUntil >= today)
+                && (e.DisplayUntil == null || e.DisplayUntil >= now)
                 && e.Targets.Any(t =>
                     t.TargetType == EventTargetType.College
                     || t.Departments.Any(d => departments.Contains(d.DepartmentId))
@@ -134,7 +133,7 @@ public class EventAccessService(ApplicationDbContext db, IClock clock) : IEventA
                 || e.Targets.Any(t => t.TargetType == EventTargetType.College)
                 || ((e.Status == EventStatus.Published || e.Status == EventStatus.Scheduled)
                     && (e.PublishAt == null || e.PublishAt <= now)
-                    && (e.DisplayUntil == null || e.DisplayUntil >= today)
+                    && (e.DisplayUntil == null || e.DisplayUntil >= now)
                     // นัดหมายรายบุคคลของผู้อื่นถือเป็นข้อมูลส่วนตัว
                     && e.Targets.Any(t => t.TargetType != EventTargetType.Individual || t.Users.Any(u => u.UserId == uid))));
         }
@@ -155,7 +154,7 @@ public class EventAccessService(ApplicationDbContext db, IClock clock) : IEventA
                 // กิจกรรมเผยแพร่แล้วที่ตรงกับครู
                 || ((e.Status == EventStatus.Published || e.Status == EventStatus.Scheduled)
                     && (e.PublishAt == null || e.PublishAt <= now)
-                    && (e.DisplayUntil == null || e.DisplayUntil >= today)
+                    && (e.DisplayUntil == null || e.DisplayUntil >= now)
                     && e.Targets.Any(t =>
                         t.TargetType == EventTargetType.College
                         || t.Departments.Any(d => relatedDepartments.Contains(d.DepartmentId))

@@ -60,7 +60,7 @@ public class EventInput : IValidatableObject
     public string? ResponsibleUserId { get; set; }
 
     [Display(Name = "วันเวลาเผยแพร่")] public DateTime? PublishAt { get; set; }
-    [Display(Name = "สิ้นสุดการแสดงผล"), DataType(DataType.Date)] public DateOnly? DisplayUntil { get; set; }
+    [Display(Name = "สิ้นสุดการแสดงผล")] public DateTime? DisplayUntil { get; set; }
 
     [Display(Name = "สถานะ")]
     [Required(ErrorMessage = "กรุณาเลือกสถานะ")]
@@ -91,8 +91,8 @@ public class EventInput : IValidatableObject
         if (Status == EventStatus.Scheduled && PublishAt is null)
             yield return new("สถานะตั้งเวลาเผยแพร่ต้องระบุวันเวลาเผยแพร่", [nameof(PublishAt)]);
 
-        if (DisplayUntil is not null && PublishAt is not null && DisplayUntil < DateOnly.FromDateTime(PublishAt.Value))
-            yield return new("วันที่สิ้นสุดการแสดงผลต้องไม่ก่อนวันเผยแพร่", [nameof(DisplayUntil)]);
+        if (DisplayUntil is not null && PublishAt is not null && DisplayUntil < PublishAt)
+            yield return new("วันเวลาสิ้นสุดการแสดงผลต้องไม่ก่อนวันเวลาเผยแพร่", [nameof(DisplayUntil)]);
     }
 }
 
@@ -227,7 +227,7 @@ public class EventDetailsDto
     public string ResponsibleName { get; set; } = string.Empty;
     public DateTime? PublishAt { get; set; }
     public string PublishAtText { get; set; } = string.Empty;
-    public DateOnly? DisplayUntil { get; set; }
+    public DateTime? DisplayUntil { get; set; }
     public string DisplayUntilText { get; set; } = string.Empty;
     public EventStatus Status { get; set; }
     public string StatusText { get; set; } = string.Empty;

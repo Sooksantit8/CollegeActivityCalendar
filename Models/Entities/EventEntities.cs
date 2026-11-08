@@ -44,7 +44,7 @@ public class Event
     public ApplicationUser ResponsibleUser { get; set; } = null!;
 
     public DateTime? PublishAt { get; set; }
-    public DateOnly? DisplayUntil { get; set; }
+    public DateTime? DisplayUntil { get; set; }
     public EventStatus Status { get; set; }
 
     [Required] public string CreatedByUserId { get; set; } = string.Empty;
